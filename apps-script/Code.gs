@@ -11,8 +11,8 @@ const TAB_ORDER = ["Молочка", "Бакалея", "Овощи и фрукт
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    const url = createDoc_(data);
-    return json_({ ok: true, url: url });
+    const res = createDoc_(data);
+    return json_({ ok: true, url: res.url, tabs: res.tabs, tabError: res.tabError });
   } catch (err) {
     return json_({ ok: false, error: String(err && err.message || err) });
   }
@@ -46,25 +46,27 @@ function createDoc_(data) {
   });
 
   // Создаём вкладки через Docs API; если не вышло — всё пишем в одну вкладку с разделами
-  let tabIds = null;
+  let tabIds = null, tabError = "";
   try {
     tabIds = addTabs_(id, ["Сводка"].concat(TAB_ORDER));
   } catch (err) {
-    console.warn("Вкладки не созданы, пишу разделами: " + err);
+    tabError = String(err && err.message || err);
+    console.warn("Вкладки не созданы, пишу разделами: " + tabError);
   }
 
   const d = DocumentApp.openById(id);
   if (tabIds) {
-    writeSummary_(d.getTab(tabIds["Сводка"]).asDocumentTab().getBody(), data);
+    writeSummary_(d.getTab(tabIds["Сводка"]).asDocumentTab().getBody(), data, true);
     TAB_ORDER.forEach(function (t) {
-      writeTab_(d.getTab(tabIds[t]).asDocumentTab().getBody(), t, tabs[t]);
+      writeTab_(d.getTab(tabIds[t]).asDocumentTab().getBody(), t, tabs[t], true);
     });
   } else {
+    // запасной вариант: одна вкладка, разделы с новой страницы (без очистки между разделами)
     const body = d.getBody();
-    writeSummary_(body, data);
+    writeSummary_(body, data, true);
     TAB_ORDER.forEach(function (t) {
       body.appendPageBreak();
-      writeTab_(body, t, tabs[t]);
+      writeTab_(body, t, tabs[t], false);
     });
   }
   d.saveAndClose();
@@ -76,36 +78,31 @@ function createDoc_(data) {
   }
   // повар и закупщик открывают документ по ссылке
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
-  return "https://docs.google.com/document/d/" + id + "/edit";
+  return { url: "https://docs.google.com/document/d/" + id + "/edit", tabs: !!tabIds, tabError: tabError };
 }
 
 /** Первая вкладка переименовывается в «Сводка», остальные добавляются. Возвращает {название: tabId}. */
 function addTabs_(docId, titles) {
-  const api = "https://docs.googleapis.com/v1/documents/" + docId;
-  const headers = { Authorization: "Bearer " + ScriptApp.getOAuthToken() };
-  const docJson = JSON.parse(UrlFetchApp.fetch(api + "?includeTabsContent=true", { headers: headers }).getContentText());
+  // Расширенная служба «Docs» (Google Docs API) — подключена в appsscript.json
+  const docJson = Docs.Documents.get(docId, { includeTabsContent: true });
   const firstId = docJson.tabs[0].tabProperties.tabId;
 
   const requests = [{ updateDocumentTabProperties: { tabProperties: { tabId: firstId, title: titles[0] }, fields: "title" } }];
   titles.slice(1).forEach(function (t, i) {
     requests.push({ addDocumentTab: { tabProperties: { title: t, index: i + 1 } } });
   });
-  const resp = UrlFetchApp.fetch(api + ":batchUpdate", {
-    method: "post", contentType: "application/json", headers: headers,
-    payload: JSON.stringify({ requests: requests }), muteHttpExceptions: true
-  });
-  if (resp.getResponseCode() !== 200) throw new Error(resp.getContentText().slice(0, 300));
+  const resp = Docs.Documents.batchUpdate({ requests: requests }, docId);
 
   const ids = {};
   ids[titles[0]] = firstId;
-  JSON.parse(resp.getContentText()).replies.forEach(function (r) {
+  (resp.replies || []).forEach(function (r) {
     if (r.addDocumentTab) ids[r.addDocumentTab.tabProperties.title] = r.addDocumentTab.tabProperties.tabId;
   });
   return ids;
 }
 
-function writeSummary_(body, data) {
-  body.clear();
+function writeSummary_(body, data, clear) {
+  if (clear) body.clear();
   body.appendParagraph(data.title || "Закуп").setHeading(DocumentApp.ParagraphHeading.TITLE);
   const info = [];
   if (data.date) info.push("Дата: " + data.date);
@@ -129,8 +126,8 @@ function writeSummary_(body, data) {
   }
 }
 
-function writeTab_(body, tabName, sections) {
-  if (body.clear) body.clear();
+function writeTab_(body, tabName, sections, clear) {
+  if (clear) body.clear();
   body.appendParagraph(tabName).setHeading(DocumentApp.ParagraphHeading.HEADING1);
   if (!sections.length) {
     body.appendParagraph("— ничего не нужно —");
