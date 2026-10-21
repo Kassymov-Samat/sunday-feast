@@ -187,7 +187,10 @@
 <script>
 (function () {
   const DISHES = window.DISHES || [];
-  const P = (window.PRICES && window.PRICES.products) || {};
+  // цена продукта + его название/единица из каталога (каталог есть, даже если цена ещё не найдена)
+  const CAT = (window.PRICES && window.PRICES.catalog) || {};
+  const PR = (window.PRICES && window.PRICES.products) || {};
+  const P = Object.fromEntries([...new Set([...Object.keys(CAT), ...Object.keys(PR)])].map(k => [k, { ...CAT[k], ...PR[k] }]));
   const byId = Object.fromEntries(DISHES.map(d => [d.id, d]));
   const STORE_KEY = "sunday-feast-vedic-v1";
   const $ = (id) => document.getElementById(id);
@@ -268,9 +271,10 @@
   function rowHtml(it) {
     const p = it.p;
     const tip = p.example ? `Например: ${p.example} — ${money(p.pack_price)} (${p.pack_label || ""}${p.store ? ", " + p.store : ""})` : "Цена не найдена";
+    const noPrice = `<span class="hint">цена уточняется</span>`;
     const priceCell = it.spice
-      ? (p.pack_price ? `${money(p.pack_price)}<div class="hint">${esc(p.pack_label || "")}</div>` : "—")
-      : (p.price_per_unit ? `${money(p.price_per_unit)}<div class="hint">за ${it.unit}</div>` : "—");
+      ? (p.pack_price ? `${money(p.pack_price)}<div class="hint">${esc(p.pack_label || "")}</div>` : noPrice)
+      : (p.price_per_unit ? `${money(p.price_per_unit)}<div class="hint">за ${it.unit}</div>` : noPrice);
     return `
       <tr class="${it.off ? "off" : ""}" title="${esc(tip)}">
         <td class="chk"><input type="checkbox" data-toggle="${it.key}" ${it.off ? "" : "checked"} aria-label="Купить: ${esc(it.name)}"></td>

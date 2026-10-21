@@ -108,7 +108,10 @@ def fetch(key, p):
 
 
 def save(prices: dict) -> None:
-    data = {"updated": datetime.now().strftime("%d.%m.%Y"), "source": "arzan.kz, Алматы", "products": prices}
+    # catalog — названия и единицы всех продуктов, даже если цену пока не нашли
+    catalog = {k: {"name": p["name"], "unit": p["unit"], "spice": bool(p.get("spice"))} for k, p in PRODUCTS.items()}
+    data = {"updated": datetime.now().strftime("%d.%m.%Y"), "source": "arzan.kz, Алматы",
+            "catalog": catalog, "products": prices}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text("// Сгенерировано tools/fetch_prices.py — цены с arzan.kz (Алматы)\nwindow.PRICES = "
                    + json.dumps(data, ensure_ascii=False, indent=1) + ";\n", encoding="utf-8")

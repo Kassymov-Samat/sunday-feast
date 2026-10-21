@@ -2,6 +2,243 @@
 window.PRICES = {
  "updated": "21.10.2026",
  "source": "arzan.kz, Алматы",
+ "catalog": {
+  "basmati": {
+   "name": "Рис басмати",
+   "unit": "кг",
+   "spice": false
+  },
+  "mung": {
+   "name": "Маш (мунг дал)",
+   "unit": "кг",
+   "spice": false
+  },
+  "besan": {
+   "name": "Мука нутовая (бесан)",
+   "unit": "кг",
+   "spice": false
+  },
+  "atta": {
+   "name": "Мука цельнозерновая (атта)",
+   "unit": "кг",
+   "spice": false
+  },
+  "flour": {
+   "name": "Мука пшеничная",
+   "unit": "кг",
+   "spice": false
+  },
+  "semolina": {
+   "name": "Крупа манная",
+   "unit": "кг",
+   "spice": false
+  },
+  "ghee": {
+   "name": "Масло топлёное (гхи)",
+   "unit": "кг",
+   "spice": false
+  },
+  "paneer": {
+   "name": "Сыр адыгейский (панир)",
+   "unit": "кг",
+   "spice": false
+  },
+  "milk": {
+   "name": "Молоко 2,5–3,2%",
+   "unit": "л",
+   "spice": false
+  },
+  "yogurt": {
+   "name": "Йогурт натуральный",
+   "unit": "кг",
+   "spice": false
+  },
+  "cream": {
+   "name": "Сливки 20%",
+   "unit": "л",
+   "spice": false
+  },
+  "sour_cream": {
+   "name": "Сметана",
+   "unit": "кг",
+   "spice": false
+  },
+  "potato": {
+   "name": "Картофель",
+   "unit": "кг",
+   "spice": false
+  },
+  "cauliflower": {
+   "name": "Капуста цветная",
+   "unit": "кг",
+   "spice": false
+  },
+  "peas": {
+   "name": "Горошек зелёный замороженный",
+   "unit": "кг",
+   "spice": false
+  },
+  "zucchini": {
+   "name": "Кабачки",
+   "unit": "кг",
+   "spice": false
+  },
+  "carrot": {
+   "name": "Морковь",
+   "unit": "кг",
+   "spice": false
+  },
+  "tomato": {
+   "name": "Помидоры",
+   "unit": "кг",
+   "spice": false
+  },
+  "cucumber": {
+   "name": "Огурцы свежие",
+   "unit": "кг",
+   "spice": false
+  },
+  "pepper_bell": {
+   "name": "Перец болгарский",
+   "unit": "кг",
+   "spice": false
+  },
+  "ginger": {
+   "name": "Имбирь свежий",
+   "unit": "кг",
+   "spice": false
+  },
+  "chili": {
+   "name": "Перец чили свежий",
+   "unit": "кг",
+   "spice": false
+  },
+  "cilantro": {
+   "name": "Кинза",
+   "unit": "кг",
+   "spice": false
+  },
+  "greens": {
+   "name": "Зелень (укроп, петрушка)",
+   "unit": "кг",
+   "spice": false
+  },
+  "lemon": {
+   "name": "Лимон",
+   "unit": "кг",
+   "spice": false
+  },
+  "sugar": {
+   "name": "Сахар",
+   "unit": "кг",
+   "spice": false
+  },
+  "raisins": {
+   "name": "Изюм",
+   "unit": "кг",
+   "spice": false
+  },
+  "cashew": {
+   "name": "Кешью",
+   "unit": "кг",
+   "spice": false
+  },
+  "oil": {
+   "name": "Масло подсолнечное (для фритюра)",
+   "unit": "л",
+   "spice": false
+  },
+  "apple": {
+   "name": "Яблоки",
+   "unit": "кг",
+   "spice": false
+  },
+  "grape": {
+   "name": "Виноград",
+   "unit": "кг",
+   "spice": false
+  },
+  "mandarin": {
+   "name": "Мандарины",
+   "unit": "кг",
+   "spice": false
+  },
+  "banana": {
+   "name": "Бананы",
+   "unit": "кг",
+   "spice": false
+  },
+  "water": {
+   "name": "Вода питьевая",
+   "unit": "л",
+   "spice": false
+  },
+  "salt": {
+   "name": "Соль",
+   "unit": "кг",
+   "spice": true
+  },
+  "asafoetida": {
+   "name": "Асафетида (хинг)",
+   "unit": "кг",
+   "spice": true
+  },
+  "turmeric": {
+   "name": "Куркума молотая",
+   "unit": "кг",
+   "spice": true
+  },
+  "cumin": {
+   "name": "Зира (семена кумина)",
+   "unit": "кг",
+   "spice": true
+  },
+  "coriander": {
+   "name": "Кориандр молотый",
+   "unit": "кг",
+   "spice": true
+  },
+  "garam": {
+   "name": "Гарам масала",
+   "unit": "кг",
+   "spice": true
+  },
+  "cardamom": {
+   "name": "Кардамон",
+   "unit": "кг",
+   "spice": true
+  },
+  "cinnamon": {
+   "name": "Корица молотая",
+   "unit": "кг",
+   "spice": true
+  },
+  "cloves": {
+   "name": "Гвоздика",
+   "unit": "кг",
+   "spice": true
+  },
+  "mustard": {
+   "name": "Горчица (семена)",
+   "unit": "кг",
+   "spice": true
+  },
+  "chili_ground": {
+   "name": "Перец чили молотый",
+   "unit": "кг",
+   "spice": true
+  },
+  "black_pepper": {
+   "name": "Перец чёрный молотый",
+   "unit": "кг",
+   "spice": true
+  },
+  "bay_leaf": {
+   "name": "Лавровый лист",
+   "unit": "кг",
+   "spice": true
+  }
+ },
  "products": {
   "basmati": {
    "name": "Рис басмати",
