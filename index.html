@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ведический воскресный пир</title>
+<meta name="description" content="Вегетарианское ведическое меню: выберите блюда — сайт соберёт список продуктов и специй с ценами Алматы (arzan.kz)">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+<style>
+  :root {
+    --bg: #faf7f2; --card: #ffffff; --text: #2a2420; --muted: #8a7f76; --line: #ece5dc;
+    --accent: #c2562b; --accent-soft: #fbe9df; --ok: #2f8f5b; --ok-soft: #e3f4ea; --off: #b9b0a7;
+    --shadow: 0 1px 2px rgba(60, 40, 20, .06), 0 4px 16px rgba(60, 40, 20, .05); --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1b1815; --card: #24201c; --text: #f1ebe4; --muted: #a59a8f; --line: #38312b;
+      --accent: #e8794a; --accent-soft: #3a261c; --ok: #5cc28a; --ok-soft: #1f3328; --off: #6b625a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.5 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  h1 { font-size: 30px; margin: 0 0 4px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0; }
+  .guests { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 8px 6px 16px; box-shadow: var(--shadow); }
+  .guests b { font-size: 14px; }
+  .step { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg);
+    color: var(--text); font-size: 18px; cursor: pointer; }
+  .step:hover { border-color: var(--accent); color: var(--accent); }
+  #guests { width: 48px; text-align: center; font: inherit; font-size: 18px; font-weight: 700; border: none;
+    background: transparent; color: var(--text); }
+  .grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+  .grid > * { min-width: 0; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) {
+    .card { padding: 14px 12px; }
+    td, th { padding: 7px 5px; }
+    h1 { font-size: 25px; }
+  }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; }
+  .card + .card { margin-top: 20px; }
+  h2 { font-size: 17px; margin: 0 0 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  h2 small { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  select, .btn { font: inherit; }
+  .add-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .add-row select { flex: 1; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--bg); color: var(--text); }
+  .btn { border: none; border-radius: 10px; padding: 9px 14px; font-weight: 600; cursor: pointer; background: var(--accent); color: #fff; }
+  .btn:hover { filter: brightness(1.05); }
+  .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--accent); }
+  .cat { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+  .dish { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--bg); margin-bottom: 6px; }
+  .dish .em { font-size: 20px; }
+  .dish .nm { flex: 1; min-width: 0; }
+  .dish .nm div { font-weight: 600; }
+  .dish .nm small { color: var(--muted); }
+  .x { border: none; background: transparent; color: var(--muted); font-size: 18px; cursor: pointer; width: 30px; height: 30px; border-radius: 8px; }
+  .x:hover { background: var(--accent-soft); color: var(--accent); }
+  .empty { color: var(--muted); padding: 10px 0; }
+  .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { border: 1px dashed var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 4px 10px; cursor: pointer; font: inherit; font-size: 13px; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted);
+    padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.chk { width: 30px; }
+  td.chk input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+  .pname { font-weight: 600; }
+  .uses { color: var(--muted); font-size: 12.5px; }
+  .hint { color: var(--muted); font-size: 12px; }
+  tr.off td { color: var(--off); }
+  tr.off .pname { text-decoration: line-through; }
+  .totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--line); }
+  @media (max-width: 560px) { .totals { grid-template-columns: repeat(2, 1fr); } .hide-sm { display: none; } }
+  .tot { background: var(--card); padding: 14px 16px; }
+  .tot span { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  .tot b { font-size: 22px; font-variant-numeric: tabular-nums; }
+  .tot.main { background: var(--accent-soft); }
+  .tot.main b { color: var(--accent); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: var(--bg);
+    padding: 10px 18px; border-radius: 999px; transition: transform .25s ease; font-weight: 600; z-index: 10; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  details.ref summary { cursor: pointer; font-weight: 600; }
+  details.ref .ritem { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  details.ref .ritem:last-child { border-bottom: none; }
+  footer { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 28px; }
+  footer a { color: var(--accent); }
+  @media print {
+    .add-row, .quick, .actions, .x, .guests .step, details.ref, td.chk, footer { display: none !important; }
+    tr.off { display: none; }
+    body { background: #fff; }
+    .card { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>🪷 Ведический воскресный пир</h1>
+      <p class="sub">Вегетарианские блюда в духе книги Адираджа даса «Ведическое кулинарное искусство» —
+        без мяса, рыбы, яиц, лука и чеснока. Выберите блюда — список продуктов и специй соберётся сам.
+        Цены: <span id="priceSrc">—</span></p>
+    </div>
+    <div class="guests" title="Количество гостей">
+      <b>Гостей</b>
+      <button class="step" id="minus" aria-label="Меньше гостей">−</button>
+      <input id="guests" type="number" min="1" max="200" value="8" aria-label="Количество гостей">
+      <button class="step" id="plus" aria-label="Больше гостей">+</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <aside>
+      <section class="card">
+        <h2>Меню <small id="dishCount"></small></h2>
+        <div class="add-row">
+          <select id="dishSelect" aria-label="Добавить блюдо из справочника"></select>
+          <button class="btn" id="addBtn">Добавить</button>
+        </div>
+        <div id="menu"></div>
+        <div class="quick" id="quick"></div>
+      </section>
+
+      <section class="card">
+        <details class="ref">
+          <summary>📖 Справочник блюд (<span id="refCount"></span>)</summary>
+          <p class="hint">Состав указан на одного гостя.</p>
+          <div id="reference"></div>
+        </details>
+      </section>
+    </aside>
+
+    <main>
+      <div class="totals">
+        <div class="tot"><span>Продукты</span><b id="tProducts">0 ₸</b></div>
+        <div class="tot"><span>Специи</span><b id="tSpices">0 ₸</b></div>
+        <div class="tot main"><span>Итого</span><b id="tTotal">0 ₸</b></div>
+        <div class="tot"><span>На гостя</span><b id="tPer">0 ₸</b></div>
+      </div>
+
+      <section class="card">
+        <h2>🛒 Продукты <small>снимите галочку, если продукт уже есть</small></h2>
+        <table>
+          <thead><tr><th></th><th>Продукт</th><th class="num">Нужно</th><th class="num hide-sm">Цена</th><th class="num">Сумма</th></tr></thead>
+          <tbody id="products"></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>🧂 Специи и приправы <small>считаем по 1 упаковке</small></h2>
+        <table>
+          <thead><tr><th></th><th>Специя</th><th class="num">Нужно</th><th class="num hide-sm">Упаковка</th><th class="num">Сумма</th></tr></thead>
+          <tbody id="spices"></tbody>
+        </table>
+        <div class="actions">
+          <button class="btn" id="copyBtn">Скопировать список покупок</button>
+          <button class="btn ghost" id="printBtn">Печать</button>
+          <button class="btn ghost" id="shareBtn">Ссылка на это меню</button>
+          <button class="btn ghost" id="resetBtn">Сбросить</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    Цены — ориентир: медиана по магазинам Алматы с <a href="https://arzan.kz/ru/almaty" target="_blank" rel="noopener">arzan.kz</a>,
+    обновлены <span id="priceDate">—</span>. Реальная сумма зависит от фасовки и магазина.<br>
+    Состав блюд — ориентировочный, на одного гостя; рецепты и техника приготовления — в книге
+    Адираджа даса «Ведическое кулинарное искусство».
+  </footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="data/dishes.js"></script>
+<script src="data/prices.js"></script>
+<script>
+(function () {
+  const DISHES = window.DISHES || [];
+  const P = (window.PRICES && window.PRICES.products) || {};
+  const byId = Object.fromEntries(DISHES.map(d => [d.id, d]));
+  const STORE_KEY = "sunday-feast-vedic-v1";
+  const $ = (id) => document.getElementById(id);
+
+  // ── состояние: выбранные блюда, гости, убранные позиции ──
+  let state = { dishes: [...(window.DEFAULT_DISHES || [])], guests: 8, off: [] };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if (saved && Array.isArray(saved.dishes)) state = saved;
+  } catch (e) { /* хранилище недоступно — работаем с настройками по умолчанию */ }
+  // ссылка «на это меню»: #d=plov,olivier&g=10&off=salt
+  if (location.hash.length > 1) {
+    const h = new URLSearchParams(location.hash.slice(1));
+    if (h.get("d")) state.dishes = h.get("d").split(",").filter(id => byId[id]);
+    if (h.get("g")) state.guests = Math.max(1, +h.get("g") || 8);
+    state.off = h.get("off") ? h.get("off").split(",") : [];
+  }
+  state.dishes = state.dishes.filter(id => byId[id]);
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  const money = (n) => Math.round(n).toLocaleString("ru-RU") + " ₸";
+  function amount(q, unit) {
+    if (unit === "шт") return Math.ceil(q - 1e-9) + " шт";
+    if (unit === "кг") return q < 1 ? Math.max(1, Math.round(q * 1000)) + " г" : (Math.round(q * 10) / 10).toLocaleString("ru-RU") + " кг";
+    if (unit === "л") return q < 1 ? Math.max(1, Math.round(q * 1000)) + " мл" : (Math.round(q * 10) / 10).toLocaleString("ru-RU") + " л";
+    return q + " " + unit;
+  }
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ── сбор списка: продукты и специи по выбранным блюдам × гости ──
+  function collect() {
+    const items = {};
+    for (const id of state.dishes) {
+      const d = byId[id];
+      for (const [kind, list] of [["products", d.products], ["spices", d.spices]]) {
+        for (const [key, perGuest] of Object.entries(list || {})) {
+          const it = items[key] || (items[key] = { key, kind, qty: 0, uses: [] });
+          it.qty += perGuest * state.guests;
+          if (!it.uses.includes(d.name)) it.uses.push(d.name);
+        }
+      }
+    }
+    return Object.values(items).map(it => {
+      const p = P[it.key] || {};
+      const unit = p.unit || "кг";
+      const spice = it.kind === "spices" || p.spice;
+      const qty = unit === "шт" ? Math.ceil(it.qty - 1e-9) : it.qty;
+      const cost = spice ? (p.pack_price || 0) : qty * (p.price_per_unit || 0);
+      return { ...it, spice, unit, qty, cost, p, name: p.name || it.key, off: state.off.includes(it.key) };
+    }).sort((a, b) => b.cost - a.cost);
+  }
+
+  function renderMenu() {
+    const cats = {};
+    for (const id of state.dishes) (cats[byId[id].category] ||= []).push(byId[id]);
+    $("menu").innerHTML = state.dishes.length ? Object.entries(cats).map(([cat, ds]) => `
+      <div class="cat">${esc(cat)}</div>
+      ${ds.map(d => `
+        <div class="dish">
+          <span class="em">${d.emoji || "🍽️"}</span>
+          <div class="nm"><div>${esc(d.name)}</div><small>${esc(d.note || "")}</small></div>
+          <button class="x" data-remove="${d.id}" title="Убрать из меню" aria-label="Убрать ${esc(d.name)}">✕</button>
+        </div>`).join("")}`).join("")
+      : `<div class="empty">Меню пустое — добавьте блюда из списка выше.</div>`;
+    $("dishCount").textContent = state.dishes.length ? `${state.dishes.length} блюд` : "";
+
+    const rest = DISHES.filter(d => !state.dishes.includes(d.id));
+    $("dishSelect").innerHTML = rest.length
+      ? `<option value="">— выберите блюдо —</option>` + [...new Set(rest.map(d => d.category))].map(cat =>
+          `<optgroup label="${esc(cat)}">${rest.filter(d => d.category === cat).map(d => `<option value="${d.id}">${d.emoji || ""} ${esc(d.name)}</option>`).join("")}</optgroup>`).join("")
+      : `<option value="">Все блюда уже в меню</option>`;
+    $("quick").innerHTML = rest.slice(0, 8).map(d => `<button class="chip" data-add="${d.id}">+ ${esc(d.name)}</button>`).join("");
+  }
+
+  function rowHtml(it) {
+    const p = it.p;
+    const tip = p.example ? `Например: ${p.example} — ${money(p.pack_price)} (${p.pack_label || ""}${p.store ? ", " + p.store : ""})` : "Цена не найдена";
+    const priceCell = it.spice
+      ? (p.pack_price ? `${money(p.pack_price)}<div class="hint">${esc(p.pack_label || "")}</div>` : "—")
+      : (p.price_per_unit ? `${money(p.price_per_unit)}<div class="hint">за ${it.unit}</div>` : "—");
+    return `
+      <tr class="${it.off ? "off" : ""}" title="${esc(tip)}">
+        <td class="chk"><input type="checkbox" data-toggle="${it.key}" ${it.off ? "" : "checked"} aria-label="Купить: ${esc(it.name)}"></td>
+        <td><div class="pname">${esc(it.name)}</div><div class="uses">${esc(it.uses.join(", "))}</div></td>
+        <td class="num">${amount(it.qty, it.unit)}</td>
+        <td class="num hide-sm">${priceCell}</td>
+        <td class="num">${p.price_per_unit || p.pack_price ? money(it.cost) : "—"}</td>
+      </tr>`;
+  }
+
+  function render() {
+    $("guests").value = state.guests;
+    renderMenu();
+    const items = collect();
+    const prods = items.filter(i => !i.spice), sps = items.filter(i => i.spice);
+    $("products").innerHTML = prods.length ? prods.map(rowHtml).join("") : `<tr><td colspan="5" class="empty">Добавьте блюда в меню</td></tr>`;
+    $("spices").innerHTML = sps.length ? sps.map(rowHtml).join("") : `<tr><td colspan="5" class="empty">Специи не нужны</td></tr>`;
+    const sum = (arr) => arr.filter(i => !i.off).reduce((s, i) => s + i.cost, 0);
+    const tp = sum(prods), ts = sum(sps);
+    $("tProducts").textContent = money(tp);
+    $("tSpices").textContent = money(ts);
+    $("tTotal").textContent = money(tp + ts);
+    $("tPer").textContent = money((tp + ts) / Math.max(1, state.guests));
+    save();
+  }
+
+  function renderReference() {
+    $("refCount").textContent = DISHES.length;
+    const line = (list) => Object.entries(list || {}).map(([k, q]) => `${(P[k] && P[k].name) || k} ${amount(q, (P[k] && P[k].unit) || "кг")}`).join(", ");
+    $("reference").innerHTML = DISHES.map(d => `
+      <div class="ritem"><b>${d.emoji || ""} ${esc(d.name)}</b> <span class="hint">· ${esc(d.category)}</span><br>
+        ${esc(line(d.products))}${Object.keys(d.spices || {}).length ? `<br><span class="hint">Специи: ${esc(line(d.spices))}</span>` : ""}
+      </div>`).join("");
+  }
+
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1800);
+  }
+  async function copy(text, msg) {
+    try { await navigator.clipboard.writeText(text); }
+    catch (e) { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+    toast(msg);
+  }
+
+  function addDish(id) {
+    if (id && byId[id] && !state.dishes.includes(id)) { state.dishes.push(id); render(); }
+  }
+  function setGuests(n) { state.guests = Math.min(200, Math.max(1, Math.round(n) || 1)); render(); }
+
+  // ── события ──
+  $("addBtn").onclick = () => addDish($("dishSelect").value);
+  $("dishSelect").onchange = (e) => addDish(e.target.value);
+  $("minus").onclick = () => setGuests(state.guests - 1);
+  $("plus").onclick = () => setGuests(state.guests + 1);
+  $("guests").onchange = (e) => setGuests(+e.target.value);
+  document.addEventListener("click", (e) => {
+    const rm = e.target.closest("[data-remove]");
+    if (rm) { state.dishes = state.dishes.filter(id => id !== rm.dataset.remove); render(); return; }
+    const add = e.target.closest("[data-add]");
+    if (add) addDish(add.dataset.add);
+  });
+  document.addEventListener("change", (e) => {
+    const t = e.target.closest("[data-toggle]");
+    if (!t) return;
+    const k = t.dataset.toggle;
+    state.off = t.checked ? state.off.filter(x => x !== k) : [...state.off, k];
+    render();
+  });
+  $("copyBtn").onclick = () => {
+    const items = collect().filter(i => !i.off);
+    const block = (arr) => arr.map(i => `• ${i.name} — ${amount(i.qty, i.unit)}`).join("\n");
+    const prods = items.filter(i => !i.spice), sps = items.filter(i => i.spice);
+    const total = items.reduce((s, i) => s + i.cost, 0);
+    const text = `🪷 Ведический воскресный пир на ${state.guests} гостей\n` +
+      `Меню: ${state.dishes.map(id => byId[id].name).join(", ")}\n\n🛒 Продукты:\n${block(prods)}` +
+      (sps.length ? `\n\n🧂 Специи:\n${block(sps)}` : "") + `\n\nОриентировочно: ${money(total)}`;
+    copy(text, "Список скопирован");
+  };
+  $("printBtn").onclick = () => window.print();
+  $("shareBtn").onclick = () => {
+    const h = new URLSearchParams({ d: state.dishes.join(","), g: state.guests });
+    if (state.off.length) h.set("off", state.off.join(","));
+    copy(location.href.split("#")[0] + "#" + h.toString(), "Ссылка на меню скопирована");
+  };
+  $("resetBtn").onclick = () => { state = { dishes: [...(window.DEFAULT_DISHES || [])], guests: 8, off: [] }; history.replaceState(null, "", location.pathname); render(); };
+
+  const pr = window.PRICES || {};
+  $("priceSrc").textContent = pr.updated ? `${pr.source || "arzan.kz"}, ${pr.updated}` : "не загружены";
+  $("priceDate").textContent = pr.updated || "—";
+  renderReference();
+  render();
+})();
+</script>
+</body>
+</html>
