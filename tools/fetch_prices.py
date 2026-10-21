@@ -107,10 +107,33 @@ def fetch(key, p):
     }
 
 
+def save(prices: dict) -> None:
+    data = {"updated": datetime.now().strftime("%d.%m.%Y"), "source": "arzan.kz, Алматы", "products": prices}
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text("// Сгенерировано tools/fetch_prices.py — цены с arzan.kz (Алматы)\nwindow.PRICES = "
+                   + json.dumps(data, ensure_ascii=False, indent=1) + ";\n", encoding="utf-8")
+
+
+def load_existing() -> dict:
+    if not OUT.exists():
+        return {}
+    text = OUT.read_text(encoding="utf-8")
+    try:
+        return json.loads(text[text.index("{"): text.rindex("}") + 1]).get("products", {})
+    except Exception:
+        return {}
+
+
 def main():
+    """python tools/fetch_prices.py            — обновить все цены
+       python tools/fetch_prices.py mung ginger — обновить только эти продукты, остальные оставить"""
     sys.stdout.reconfigure(encoding="utf-8")
-    prices, missing = {}, []
+    only = [k for k in sys.argv[1:] if k in PRODUCTS]
+    prices = {k: v for k, v in load_existing().items() if k in PRODUCTS} if only else {}
+    missing = []
     for key, p in PRODUCTS.items():
+        if only and key not in only:
+            continue
         try:
             res = fetch(key, p)
         except Exception as e:
@@ -118,14 +141,12 @@ def main():
             print(f"  ! {p['name']}: {e}")
         if res:
             prices[key] = res
+            save(prices)  # сохраняем после каждого продукта — прерывание (лимит arzan.kz) ничего не теряет
             print(f"{p['name']:<28} {res['price_per_unit']:>7} ₸/{p['unit']:<2}  ({res['matches']} тов.)  пример: {res['example']} — {res['pack_price']} ₸ {res['pack_label']} [{res['store']}]", flush=True)
         else:
             missing.append(p["name"])
             print(f"{p['name']:<28}  НЕ НАЙДЕНО")
-    data = {"updated": datetime.now().strftime("%d.%m.%Y"), "source": "arzan.kz, Алматы", "products": prices}
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text("// Сгенерировано tools/fetch_prices.py — цены с arzan.kz (Алматы)\nwindow.PRICES = "
-                   + json.dumps(data, ensure_ascii=False, indent=1) + ";\n", encoding="utf-8")
+    save(prices)
     print(f"\nСохранено: {OUT}  (найдено {len(prices)} из {len(PRODUCTS)})")
     if missing:
         print("Не найдено:", ", ".join(missing))
