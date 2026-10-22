@@ -16,6 +16,7 @@ function doPost(e) {
       case "deleteDish": return json_(deleteDish_(data));
       case "saveProduct": return json_(saveProducts_(data.products || {}));
       case "deleteProduct": return json_(deleteProduct_(data));
+      case "xlsxToSheet": return json_(xlsxToSheet_(data));
       default: {
         const res = createDoc_(data);
         return json_({ ok: true, url: res.url, tabs: res.tabs, tabError: res.tabError });
@@ -94,6 +95,21 @@ function saveDish_(data) {
     PropertiesService.getScriptProperties().setProperty("dish:" + d.id, JSON.stringify(dish));
     return { ok: true, dish: dish };
   });
+}
+
+/** Excel-файл с сайта (base64) → Google Таблица на Диске; доступ: все, у кого ссылка, могут редактировать. */
+function xlsxToSheet_(data) {
+  if (!data.base64) throw new Error("нет файла");
+  const name = clean_(data.name, 150) || ("Закуп — " + Utilities.formatDate(new Date(), "Asia/Almaty", "dd.MM.yyyy"));
+  const blob = Utilities.newBlob(Utilities.base64Decode(data.base64), MimeType.MICROSOFT_EXCEL, name + ".xlsx");
+  const file = Drive.Files.create({ name: name, mimeType: MimeType.GOOGLE_SHEETS }, blob);  // конвертация в Google Таблицу
+  const f = DriveApp.getFileById(file.id);
+  const folderId = PropertiesService.getScriptProperties().getProperty("FOLDER_ID");
+  if (folderId) {
+    try { f.moveTo(DriveApp.getFolderById(folderId)); } catch (err) { console.warn(err); }
+  }
+  f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
+  return { ok: true, url: "https://docs.google.com/spreadsheets/d/" + file.id + "/edit" };
 }
 
 function deleteProduct_(data) {

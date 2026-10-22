@@ -188,7 +188,8 @@
       <div class="totals" id="totals"></div>
       <div id="sections"></div>
       <div class="actions">
-        <button class="btn" id="docsBtn">📊 Скачать Excel</button>
+        <button class="btn" id="sheetsBtn">📊 Открыть в Google Таблицах</button>
+        <button class="btn ghost" id="docsBtn">Скачать Excel</button>
         <button class="btn ghost" id="copyTextBtn">Текстом (WhatsApp)</button>
         <span class="grow"></span>
         <button class="btn ghost small" id="printBtn">Печать</button>
@@ -553,7 +554,7 @@
           const q = Math.round(r.qty * 100) / 100, pr = Math.round(r.price);
           const row = ws.addRow(["☐", r.name, q, r.unit || "", pr, null]);
           row.getCell(6).value = { formula: `C${row.number}*E${row.number}`, result: Math.round(q * pr) };
-          row.getCell(3).numFmt = "0.##"; row.getCell(5).numFmt = MONEY; row.getCell(6).numFmt = MONEY;
+          row.getCell(5).numFmt = MONEY; row.getCell(6).numFmt = MONEY;
           row.getCell(1).alignment = { horizontal: "center" };
           row.eachCell({ includeEmpty: true }, c => { c.border = box; });
         }
@@ -619,7 +620,33 @@
       toast(`Excel скачан: ${x.count} позиций, ${money(x.grand)}`);
     } catch (err) {
       showDoc(`<p>Не удалось собрать Excel: ${esc(err.message)}</p>`);
-    } finally { b.disabled = false; b.textContent = "📊 Скачать Excel"; }
+    } finally { b.disabled = false; b.textContent = "Скачать Excel"; }
+  };
+
+  // ── Google Таблица: тот же Excel → скрипт Google кладёт его на Диск как таблицу с доступом по ссылке ──
+  const toBase64 = (blob) => new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(",")[1]);
+    r.onerror = () => rej(new Error("не удалось прочитать файл"));
+    r.readAsDataURL(blob);
+  });
+  $("sheetsBtn").onclick = async () => {
+    if (!computeRows().some(r => !r.off && r.qty > 0)) { toast("Список пуст — выберите блюда"); return; }
+    // окно открываем сразу по клику — иначе браузер заблокирует его как всплывающее
+    const win = window.open("about:blank", "_blank");
+    if (win) win.document.write("<p style='font:16px sans-serif;padding:24px'>Создаю Google Таблицу…</p>");
+    const b = $("sheetsBtn"); b.disabled = true; b.textContent = "Создаю таблицу…";
+    try {
+      const x = await buildExcel();
+      const res = await api({ action: "xlsxToSheet", name: x.name.replace(/\.xlsx$/, ""), base64: await toBase64(x.blob) });
+      if (win) win.location.href = res.url; else window.open(res.url, "_blank");
+      showDoc(`<p>Google Таблица создана — листы: Сводка, Молочка, Бакалея, Овощи и фрукты, Остальное.
+        Доступ по ссылке — редактировать могут все.</p>
+        <a class="doclink" href="${esc(res.url)}" target="_blank" rel="noopener">${esc(res.url)}</a>`);
+    } catch (err) {
+      if (win) win.close();
+      showDoc(`<p>Не удалось создать Google Таблицу: ${esc(err.message)}</p><p class="hint">Можно нажать «Скачать Excel» и открыть файл вручную.</p>`);
+    } finally { b.disabled = false; b.textContent = "📊 Открыть в Google Таблицах"; }
   };
 
   $("copyTextBtn").onclick = async () => {

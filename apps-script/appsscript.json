@@ -4,7 +4,8 @@
   "runtimeVersion": "V8",
   "dependencies": {
     "enabledAdvancedServices": [
-      { "userSymbol": "Docs", "serviceId": "docs", "version": "v1" }
+      { "userSymbol": "Docs", "serviceId": "docs", "version": "v1" },
+      { "userSymbol": "Drive", "serviceId": "drive", "version": "v3" }
     ]
   },
   "oauthScopes": [
