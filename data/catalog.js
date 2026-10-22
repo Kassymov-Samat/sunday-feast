@@ -1,19 +1,20 @@
-// Сгенерировано tools/build_data.py из «20260502_Меню на Майский ретрит.xlsx» и таблиц закупа.
-// section — раздел (вкладка в Google Docs); price — за единицу; price_src — откуда цена.
+// Сгенерировано tools/build_data.py из «20260502_Меню на Майский ретрит.xlsx», меню и закупов 2023–2026
+// (папка «блюда») и таблиц закупа.
+// section — раздел (вкладка в таблице); price — за единицу; price_src — откуда цена.
 window.CATALOG = {
  "butter": {
   "name": "Масло сливочное",
   "unit": "кг",
   "section": "Молочка",
   "price": 3500,
-  "price_src": "окт 2026"
+  "price_src": "задано: 3 500"
  },
  "milk": {
   "name": "Молоко",
   "unit": "л",
   "section": "Молочка",
   "price": 440,
-  "price_src": "сен 2026"
+  "price_src": "май 2026"
  },
  "kefir": {
   "name": "Кефир 2,5%",
@@ -33,8 +34,8 @@ window.CATALOG = {
   "name": "Сметана",
   "unit": "кг",
   "section": "Молочка",
-  "price": 1071,
-  "price_src": "окт 2026"
+  "price": 1000,
+  "price_src": "май 2026"
  },
  "cream": {
   "name": "Сливки 20%",
@@ -51,7 +52,7 @@ window.CATALOG = {
   "price_src": "май 2026"
  },
  "paneer": {
-  "name": "Панир",
+  "name": "Панир / брынза",
   "unit": "кг",
   "section": "Молочка",
   "price": 1750,
@@ -68,8 +69,8 @@ window.CATALOG = {
   "name": "Сухое молоко",
   "unit": "кг",
   "section": "Молочка",
-  "price": 3200,
-  "price_src": "сен 2026"
+  "price": 2500,
+  "price_src": "май 2026"
  },
  "milk_powder_gulab": {
   "name": "Сухое молоко для гулабов",
@@ -89,7 +90,7 @@ window.CATALOG = {
   "name": "Сгущёнка варёная",
   "unit": "кг",
   "section": "Молочка",
-  "price": 2000,
+  "price": 2250,
   "price_src": "май 2026"
  },
  "whey": {
@@ -103,36 +104,36 @@ window.CATALOG = {
   "name": "Картофель",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 250,
-  "price_src": "окт 2026"
+  "price": 200,
+  "price_src": "май 2026"
  },
  "carrot": {
   "name": "Морковь",
   "unit": "кг",
   "section": "Овощи и фрукты",
   "price": 250,
-  "price_src": "окт 2026"
+  "price_src": "май 2026"
  },
  "carrot_yellow": {
   "name": "Морковь жёлтая",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 300,
-  "price_src": "окт 2026"
+  "price": 350,
+  "price_src": "май 2026"
  },
  "tomato": {
   "name": "Помидоры",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 450,
-  "price_src": "окт 2026"
+  "price": 800,
+  "price_src": "май 2026"
  },
  "cherry": {
   "name": "Помидоры черри",
   "unit": "кг",
   "section": "Овощи и фрукты",
   "price": 1000,
-  "price_src": "окт 2026"
+  "price_src": "май 2026"
  },
  "cucumber": {
   "name": "Огурцы",
@@ -145,22 +146,29 @@ window.CATALOG = {
   "name": "Перец болгарский",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 700,
-  "price_src": "окт 2026"
+  "price": 1300,
+  "price_src": "май 2026"
  },
  "cauliflower": {
   "name": "Капуста цветная",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 850,
-  "price_src": "окт 2026"
+  "price": 800,
+  "price_src": "май 2026"
  },
  "cabbage": {
   "name": "Капуста белокочанная",
   "unit": "кг",
   "section": "Овощи и фрукты",
   "price": 200,
-  "price_src": "сен 2026"
+  "price_src": "май 2026"
+ },
+ "sauerkraut": {
+  "name": "Капуста квашеная",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 1500,
+  "price_src": "из 1 файла"
  },
  "peking": {
   "name": "Капуста пекинская",
@@ -197,6 +205,13 @@ window.CATALOG = {
   "price": 400,
   "price_src": "май 2026"
  },
+ "beet": {
+  "name": "Свёкла",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 250,
+  "price_src": "май 2026"
+ },
  "radish": {
   "name": "Редиска",
   "unit": "кг",
@@ -208,8 +223,8 @@ window.CATALOG = {
   "name": "Шпинат",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 1500,
-  "price_src": "сен 2026"
+  "price": 1300,
+  "price_src": "май 2026"
  },
  "iceberg": {
   "name": "Салат айсберг",
@@ -232,12 +247,19 @@ window.CATALOG = {
   "price": 1300,
   "price_src": "май 2026"
  },
+ "parsley": {
+  "name": "Петрушка",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 1500,
+  "price_src": "среднее по 8 файл."
+ },
  "cilantro": {
   "name": "Кинза",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 1200,
-  "price_src": "окт 2026"
+  "price": 1500,
+  "price_src": "май 2026"
  },
  "basil": {
   "name": "Базилик",
@@ -246,33 +268,40 @@ window.CATALOG = {
   "price": 1500,
   "price_src": "май 2026"
  },
+ "mint": {
+  "name": "Мята свежая",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 1650,
+  "price_src": "среднее по 6 файл."
+ },
  "ginger": {
   "name": "Имбирь свежий",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 1500,
-  "price_src": "окт 2026"
+  "price": 2800,
+  "price_src": "май 2026"
  },
  "chili": {
   "name": "Перец чили зелёный",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 2000,
-  "price_src": "сен 2026"
+  "price": 1800,
+  "price_src": "май 2026"
  },
  "lemon": {
   "name": "Лимоны",
   "unit": "шт",
   "section": "Овощи и фрукты",
-  "price": 177,
-  "price_src": "окт 2026"
+  "price": 200,
+  "price_src": "май 2026"
  },
  "apple": {
   "name": "Яблоки",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 800,
-  "price_src": "сен 2026"
+  "price": 700,
+  "price_src": "май 2026"
  },
  "banana": {
   "name": "Бананы",
@@ -292,15 +321,15 @@ window.CATALOG = {
   "name": "Груши",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 850,
-  "price_src": "сен 2026"
+  "price": 1000,
+  "price_src": "май 2026"
  },
  "grape": {
   "name": "Виноград",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 1200,
-  "price_src": "сен 2026"
+  "price": 1800,
+  "price_src": "май 2026"
  },
  "orange": {
   "name": "Апельсины",
@@ -309,8 +338,29 @@ window.CATALOG = {
   "price": 800,
   "price_src": "май 2026"
  },
+ "plum": {
+  "name": "Слива",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 600,
+  "price_src": "из 1 файла"
+ },
+ "apricot": {
+  "name": "Абрикосы",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 630,
+  "price_src": "среднее по 3 файл."
+ },
+ "nectarine": {
+  "name": "Нектарины / персики",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 700,
+  "price_src": "среднее по 2 файл."
+ },
  "strawberry": {
-  "name": "Клубника",
+  "name": "Клубника (свежая или замороженная)",
   "unit": "кг",
   "section": "Овощи и фрукты",
   "price": 3000,
@@ -323,12 +373,33 @@ window.CATALOG = {
   "price": 2500,
   "price_src": "май 2026"
  },
+ "currant_red": {
+  "name": "Смородина красная замороженная",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 1200,
+  "price_src": "из 1 файла"
+ },
+ "raspberry": {
+  "name": "Малина замороженная",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 1800,
+  "price_src": "из 1 файла"
+ },
+ "cherry_frozen": {
+  "name": "Вишня замороженная",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 2150,
+  "price_src": "из 1 файла"
+ },
  "peas_frozen": {
   "name": "Горошек зелёный замороженный",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 1400,
-  "price_src": "окт 2026"
+  "price": 1900,
+  "price_src": "май 2026"
  },
  "beans_green": {
   "name": "Фасоль стручковая замороженная",
@@ -338,21 +409,21 @@ window.CATALOG = {
   "price_src": "май 2026"
  },
  "rice_barakat": {
-  "name": "Рис баракат",
+  "name": "Рис круглый (баракат, краснодарский)",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 400,
-  "price_src": "окт 2026"
+  "price": 600,
+  "price_src": "май 2026"
  },
  "rice_basmati": {
   "name": "Рис басмати",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 1200,
-  "price_src": "сен 2026"
+  "price": 1500,
+  "price_src": "май 2026"
  },
  "rice_alanga": {
-  "name": "Рис аланга (для плова)",
+  "name": "Рис для плова (аланга, лазер)",
   "unit": "кг",
   "section": "Бакалея",
   "price": 1500,
@@ -362,8 +433,8 @@ window.CATALOG = {
   "name": "Гречка",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 350,
-  "price_src": "окт 2026"
+  "price": 300,
+  "price_src": "май 2026"
  },
  "millet": {
   "name": "Пшено",
@@ -387,7 +458,7 @@ window.CATALOG = {
   "price_src": "май 2026"
  },
  "oats": {
-  "name": "Овсянка",
+  "name": "Овсянка (геркулес)",
   "unit": "кг",
   "section": "Бакалея",
   "price": 800,
@@ -415,7 +486,7 @@ window.CATALOG = {
   "price_src": "май 2026"
  },
  "flour": {
-  "name": "Мука 1 сорт",
+  "name": "Мука (в/с или 1 сорт)",
   "unit": "кг",
   "section": "Бакалея",
   "price": 250,
@@ -439,8 +510,8 @@ window.CATALOG = {
   "name": "Мука нутовая",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 3500,
-  "price_src": "окт 2026"
+  "price": 2000,
+  "price_src": "май 2026"
  },
  "starch": {
   "name": "Крахмал кукурузный",
@@ -453,15 +524,15 @@ window.CATALOG = {
   "name": "Нут",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 1100,
-  "price_src": "сен 2026"
+  "price": 1300,
+  "price_src": "май 2026"
  },
  "peas_split": {
   "name": "Горох колотый",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 450,
-  "price_src": "окт 2026"
+  "price": 300,
+  "price_src": "май 2026"
  },
  "lentil": {
   "name": "Чечевица жёлтая",
@@ -469,6 +540,13 @@ window.CATALOG = {
   "section": "Бакалея",
   "price": 800,
   "price_src": "май 2026"
+ },
+ "mung": {
+  "name": "Маш",
+  "unit": "кг",
+  "section": "Бакалея",
+  "price": 920,
+  "price_src": "среднее по 5 файл."
  },
  "urad": {
   "name": "Урад дал",
@@ -495,15 +573,15 @@ window.CATALOG = {
   "name": "Сахар",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 470,
-  "price_src": "окт 2026"
+  "price": 430,
+  "price_src": "май 2026"
  },
  "sugar_powder": {
   "name": "Сахарная пудра",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 1400,
-  "price_src": "окт 2026"
+  "price": 850,
+  "price_src": "май 2026"
  },
  "honey": {
   "name": "Мёд",
@@ -516,14 +594,14 @@ window.CATALOG = {
   "name": "Масло подсолнечное",
   "unit": "л",
   "section": "Бакалея",
-  "price": 900,
-  "price_src": "сен 2026"
+  "price": 850,
+  "price_src": "май 2026"
  },
  "oil_unref": {
   "name": "Масло подсолнечное нерафинированное",
   "unit": "л",
   "section": "Бакалея",
-  "price": 1200,
+  "price": 1950,
   "price_src": "май 2026"
  },
  "oil_corn": {
@@ -537,8 +615,8 @@ window.CATALOG = {
   "name": "Томатная паста",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 900,
-  "price_src": "сен 2026"
+  "price": 1600,
+  "price_src": "май 2026"
  },
  "corn_can": {
   "name": "Кукуруза консервированная (банка 400 г)",
@@ -554,26 +632,33 @@ window.CATALOG = {
   "price": 600,
   "price_src": "май 2026"
  },
+ "mayo": {
+  "name": "Майонез постный (без яиц)",
+  "unit": "шт",
+  "section": "Бакалея",
+  "price": 450,
+  "price_src": "из 1 файла"
+ },
  "walnut": {
   "name": "Грецкий орех чищеный",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 3800,
-  "price_src": "окт 2026"
+  "price": 3500,
+  "price_src": "май 2026"
  },
  "almond": {
   "name": "Миндаль",
   "unit": "кг",
   "section": "Бакалея",
   "price": 5500,
-  "price_src": "сен 2026"
+  "price_src": "май 2026"
  },
  "cashew": {
   "name": "Кешью",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 6000,
-  "price_src": "сен 2026"
+  "price": 5500,
+  "price_src": "май 2026"
  },
  "hazelnut": {
   "name": "Фундук",
@@ -614,8 +699,8 @@ window.CATALOG = {
   "name": "Кокосовая стружка",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 2000,
-  "price_src": "окт 2026"
+  "price": 3000,
+  "price_src": "май 2026"
  },
  "raisins_black": {
   "name": "Изюм чёрный",
@@ -645,6 +730,13 @@ window.CATALOG = {
   "price": 2000,
   "price_src": "май 2026"
  },
+ "fig": {
+  "name": "Инжир сушёный",
+  "unit": "кг",
+  "section": "Бакалея",
+  "price": 2000,
+  "price_src": "из 1 файла"
+ },
  "dates": {
   "name": "Финики",
   "unit": "пачка",
@@ -653,7 +745,7 @@ window.CATALOG = {
   "price_src": "май 2026"
  },
  "compote": {
-  "name": "Компотная смесь (сухофрукты)",
+  "name": "Сухофрукты для компота",
   "unit": "кг",
   "section": "Бакалея",
   "price": 800,
@@ -663,8 +755,15 @@ window.CATALOG = {
   "name": "Сода",
   "unit": "пачка",
   "section": "Бакалея",
-  "price": 300,
-  "price_src": "сен 2026"
+  "price": 250,
+  "price_src": "май 2026"
+ },
+ "yeast": {
+  "name": "Дрожжи (пачка)",
+  "unit": "пачка",
+  "section": "Бакалея",
+  "price": 800,
+  "price_src": "май 2026"
  },
  "vanillin": {
   "name": "Ванилин (банка 0,5 кг)",
@@ -701,6 +800,13 @@ window.CATALOG = {
   "price": 5000,
   "price_src": "май 2026"
  },
+ "nori": {
+  "name": "Листья нори (пачка)",
+  "unit": "пачка",
+  "section": "Бакалея",
+  "price": 3210,
+  "price_src": "среднее по 2 файл."
+ },
  "chicory": {
   "name": "Цикорий",
   "unit": "кг",
@@ -715,6 +821,13 @@ window.CATALOG = {
   "price": 6000,
   "price_src": "май 2026"
  },
+ "ivan_tea": {
+  "name": "Иван-чай",
+  "unit": "кг",
+  "section": "Бакалея",
+  "price": 10000,
+  "price_src": "из 1 файла"
+ },
  "karkade": {
   "name": "Каркаде",
   "unit": "кг",
@@ -723,11 +836,18 @@ window.CATALOG = {
   "price_src": "май 2026"
  },
  "rosehip": {
-  "name": "Шиповник",
+  "name": "Шиповник сушёный",
   "unit": "кг",
   "section": "Бакалея",
   "price": 3000,
   "price_src": "май 2026"
+ },
+ "rosehip_syrup": {
+  "name": "Сироп шиповника (бутылка)",
+  "unit": "шт",
+  "section": "Бакалея",
+  "price": 1500,
+  "price_src": "из 1 файла"
  },
  "thyme": {
   "name": "Чебрец",
@@ -754,8 +874,8 @@ window.CATALOG = {
   "name": "Асафетида (100 г)",
   "unit": "пачка",
   "section": "Специи",
-  "price": 2000,
-  "price_src": "окт 2026",
+  "price": 1800,
+  "price_src": "май 2026",
   "per100": 0.304,
   "default": true
  },
@@ -763,8 +883,8 @@ window.CATALOG = {
   "name": "Кумин (зира) в зёрнах, 100 г",
   "unit": "пачка",
   "section": "Специи",
-  "price": 400,
-  "price_src": "окт 2026",
+  "price": 600,
+  "price_src": "май 2026",
   "per100": 0.2432,
   "default": true
  },
@@ -782,7 +902,7 @@ window.CATALOG = {
   "unit": "пачка",
   "section": "Специи",
   "price": 500,
-  "price_src": "окт 2026",
+  "price_src": "май 2026",
   "per100": 0.4053,
   "default": true
  },
@@ -790,8 +910,8 @@ window.CATALOG = {
   "name": "Куркума, 100 г",
   "unit": "пачка",
   "section": "Специи",
-  "price": 700,
-  "price_src": "окт 2026",
+  "price": 500,
+  "price_src": "май 2026",
   "per100": 0.5066,
   "default": true
  },
@@ -799,8 +919,8 @@ window.CATALOG = {
   "name": "Гарам масала",
   "unit": "пачка",
   "section": "Специи",
-  "price": 990,
-  "price_src": "сен 2026",
+  "price": 800,
+  "price_src": "май 2026",
   "per100": 0.2026,
   "default": true
  },
@@ -808,9 +928,18 @@ window.CATALOG = {
   "name": "Самбар масала",
   "unit": "пачка",
   "section": "Специи",
-  "price": 900,
-  "price_src": "окт 2026",
+  "price": 600,
+  "price_src": "май 2026",
   "per100": 0.2026,
+  "default": false
+ },
+ "chana_masala": {
+  "name": "Чана масала",
+  "unit": "пачка",
+  "section": "Специи",
+  "price": 1500,
+  "price_src": "из 1 файла",
+  "per100": 0.0,
   "default": false
  },
  "black_pepper": {
@@ -821,6 +950,24 @@ window.CATALOG = {
   "price_src": "май 2026",
   "per100": 0.2026,
   "default": true
+ },
+ "chili_ground": {
+  "name": "Чили молотый, 100 г",
+  "unit": "пачка",
+  "section": "Специи",
+  "price": 700,
+  "price_src": "среднее по 2 файл.",
+  "per100": 0.0,
+  "default": false
+ },
+ "ginger_ground": {
+  "name": "Имбирь молотый, 100 г",
+  "unit": "пачка",
+  "section": "Специи",
+  "price": 550,
+  "price_src": "среднее по 2 файл.",
+  "per100": 0.0,
+  "default": false
  },
  "salt": {
   "name": "Соль (1 кг)",
@@ -835,8 +982,8 @@ window.CATALOG = {
   "name": "Лавровый лист (50 г)",
   "unit": "пачка",
   "section": "Специи",
-  "price": 500,
-  "price_src": "окт 2026",
+  "price": 300,
+  "price_src": "май 2026",
   "per100": 0.1013,
   "default": true
  },
@@ -883,6 +1030,33 @@ window.CATALOG = {
   "price": 3000,
   "price_src": "май 2026",
   "per100": 0.0405,
+  "default": false
+ },
+ "nutmeg": {
+  "name": "Мускатный орех, 100 г",
+  "unit": "пачка",
+  "section": "Специи",
+  "price": 800,
+  "price_src": "из 1 файла",
+  "per100": 0.0,
+  "default": false
+ },
+ "saffron": {
+  "name": "Шафран (пачка 1 г)",
+  "unit": "пачка",
+  "section": "Специи",
+  "price": 1670,
+  "price_src": "среднее по 3 файл.",
+  "per100": 0.0,
+  "default": false
+ },
+ "star_anise": {
+  "name": "Бадьян",
+  "unit": "кг",
+  "section": "Специи",
+  "price": 4000,
+  "price_src": "из 1 файла",
+  "per100": 0.0,
   "default": false
  },
  "mustard_black": {
