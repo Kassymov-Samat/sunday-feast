@@ -11,16 +11,107 @@ const TAB_ORDER = ["Молочка", "Бакалея", "Овощи и фрукт
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    const res = createDoc_(data);
-    return json_({ ok: true, url: res.url, tabs: res.tabs, tabError: res.tabError });
+    switch (data.action) {
+      case "saveDish": return json_(saveDish_(data));
+      case "deleteDish": return json_(deleteDish_(data));
+      case "saveProduct": return json_(saveProducts_(data.products || {}));
+      case "deleteProduct": return json_(deleteProduct_(data));
+      default: {
+        const res = createDoc_(data);
+        return json_({ ok: true, url: res.url, tabs: res.tabs, tabError: res.tabError });
+      }
+    }
   } catch (err) {
     return json_({ ok: false, error: String(err && err.message || err) });
   }
 }
 
-// Проверка в браузере: открыть URL веб-приложения — должно ответить «работает».
-function doGet() {
+// ?action=data — блюда и продукты, добавленные/изменённые на сайте (общие для всех).
+// Без параметров — проверка, что скрипт работает.
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action === "data") return json_(loadData_());
   return json_({ ok: true, message: "Воскресный пир: экспорт в Google Docs работает" });
+}
+
+/* ── Справочник, который правят на сайте: хранится в свойствах скрипта ─────────────
+ * dish:<id>    — блюдо (своё или изменённая версия встроенного); {deleted:true} — скрыто
+ * product:<key> — продукт/специя/хоз. позиция (новая или с изменённой ценой/названием)
+ */
+function loadData_() {
+  const all = PropertiesService.getScriptProperties().getProperties();
+  const dishes = [], products = {};
+  Object.keys(all).forEach(function (k) {
+    try {
+      if (k.indexOf("dish:") === 0) dishes.push(JSON.parse(all[k]));
+      else if (k.indexOf("product:") === 0) products[k.slice(8)] = JSON.parse(all[k]);
+    } catch (err) { console.warn("битая запись " + k); }
+  });
+  return { ok: true, dishes: dishes, products: products };
+}
+
+function withLock_(fn) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try { return fn(); } finally { lock.releaseLock(); }
+}
+
+function clean_(s, max) { return String(s == null ? "" : s).trim().slice(0, max || 200); }
+
+function saveProducts_(products) {
+  return withLock_(function () {
+    const props = PropertiesService.getScriptProperties();
+    Object.keys(products).forEach(function (key) {
+      if (!/^[\w-]{1,60}$/.test(key)) throw new Error("плохой ключ продукта: " + key);
+      const p = products[key];
+      props.setProperty("product:" + key, JSON.stringify({
+        name: clean_(p.name, 120), unit: clean_(p.unit, 20), section: clean_(p.section, 40),
+        price: Math.max(0, Number(p.price) || 0), price_src: clean_(p.price_src || "изменено на сайте", 40),
+        per100: Number(p.per100) || 0, default: !!p.default, per_guest: Number(p.per_guest) || 0,
+        updated: new Date().toISOString()
+      }));
+    });
+    return { ok: true };
+  });
+}
+
+function saveDish_(data) {
+  const d = data.dish || {};
+  if (!/^[\w-]{1,60}$/.test(d.id || "")) throw new Error("нет id блюда");
+  if (!clean_(d.name)) throw new Error("нет названия блюда");
+  if (data.products) saveProducts_(data.products);
+  const num = function (m) {
+    const out = {};
+    Object.keys(m || {}).forEach(function (k) { const v = Number(m[k]); if (v > 0) out[k] = v; });
+    return out;
+  };
+  const dish = {
+    id: d.id, name: clean_(d.name, 120), category: clean_(d.category, 60) || "Другое",
+    tags: (d.tags || []).map(function (t) { return clean_(t, 30); }).slice(0, 6),
+    note: clean_(d.note, 300), source: clean_(d.source, 120) || "добавлено на сайте",
+    products: num(d.products), spices: num(d.spices), custom: true, updated: new Date().toISOString()
+  };
+  return withLock_(function () {
+    PropertiesService.getScriptProperties().setProperty("dish:" + d.id, JSON.stringify(dish));
+    return { ok: true, dish: dish };
+  });
+}
+
+function deleteProduct_(data) {
+  if (!/^[\w-]{1,60}$/.test(data.key || "")) throw new Error("нет ключа продукта");
+  return withLock_(function () {
+    PropertiesService.getScriptProperties().setProperty("product:" + data.key,
+      JSON.stringify({ deleted: true, updated: new Date().toISOString() }));
+    return { ok: true };
+  });
+}
+
+function deleteDish_(data) {
+  if (!/^[\w-]{1,60}$/.test(data.id || "")) throw new Error("нет id блюда");
+  return withLock_(function () {
+    PropertiesService.getScriptProperties().setProperty("dish:" + data.id,
+      JSON.stringify({ id: data.id, deleted: true, updated: new Date().toISOString() }));
+    return { ok: true };
+  });
 }
 
 function json_(obj) {
