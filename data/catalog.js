@@ -68,14 +68,14 @@ window.CATALOG = {
  "milk_powder": {
   "name": "Сухое молоко",
   "unit": "кг",
-  "section": "Молочка",
+  "section": "Бакалея",
   "price": 2500,
   "price_src": "май 2026"
  },
  "milk_powder_gulab": {
   "name": "Сухое молоко для гулабов",
   "unit": "кг",
-  "section": "Молочка",
+  "section": "Бакалея",
   "price": 3500,
   "price_src": "май 2026"
  },
