@@ -135,14 +135,37 @@
   dialog::backdrop { background: rgba(0,0,0,.35); }
   dialog input { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); margin: 6px 0 12px; }
   .doclink { display: block; margin-top: 8px; font-weight: 700; color: var(--accent); word-break: break-all; }
+  /* вкладки: раскладка по блюдам → список продуктов */
+  .tabs { display: flex; gap: 4px; background: var(--soft); border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-bottom: 16px; }
+  .tab { flex: 1; border: none; background: transparent; border-radius: 9px; padding: 9px 12px; font-weight: 700; cursor: pointer; color: var(--muted); }
+  .tab small { font-weight: 500; display: block; font-size: 12px; }
+  .tab.on { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+  .tab.on small { color: var(--accent); }
+  .dcard h2 { flex-wrap: wrap; align-items: center; }
+  .dcard h2 .dn { font-size: 17px; }
+  .dcard h2 .dmeta { color: var(--muted); font-weight: 500; font-size: 12.5px; flex: 1; }
+  .dcard h2 .dcost { font-variant-numeric: tabular-nums; }
+  .dcard .dnote { font-size: 12.5px; color: var(--muted); margin: -6px 0 8px; }
+  .dcard .gram { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+  .dcard tr.removed td { color: var(--off); }
+  .dcard tr.removed .pn { text-decoration: line-through; font-weight: 400; }
+  .dcard tr.added .pn::after { content: " · добавлено"; color: var(--accent); font-weight: 500; font-size: 11.5px; }
+  .dadd { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+  .dadd input { padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); min-width: 0; outline: none; }
+  .dadd input:focus { border-color: var(--accent); }
+  .dadd .an { flex: 1 1 200px; }
+  .dadd .aq { width: 90px; text-align: right; }
+  .dcard .x { width: 28px; height: 28px; }
+  .layout-foot { display: flex; justify-content: flex-end; margin-top: 12px; }
   @media (max-width: 560px) {
+    .tab { padding: 8px 6px; font-size: 14px; }
     #eventName { width: 150px; }
     .hide-sm { display: none; }
     .qin, .pin { width: 64px; }
     td, th { padding: 5px 3px; }
   }
   @media print {
-    header .icon-btn, .actions, .addrow, td.chk, .search, .cats, aside { display: none !important; }
+    header .icon-btn, .actions, .addrow, td.chk, .search, .cats, aside, .tabs, .dadd, .layout-foot, .dcard .x, .dcard .edit { display: none !important; }
     .grid { grid-template-columns: 1fr; }
     tr.off { display: none; }
     .card { box-shadow: none; }
@@ -185,6 +208,19 @@
     </aside>
 
     <main>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="layout" id="tabLayout">1. Раскладка по блюдам <small id="tabLayoutN"></small></button>
+        <button class="tab" role="tab" data-tab="list" id="tabList">2. Список продуктов <small id="tabListN"></small></button>
+      </div>
+
+      <div id="paneLayout">
+        <p class="hint" style="margin-top:0">Состав каждого блюда на <b id="layoutGuests"></b>. Количество можно исправить,
+          продукт — убрать ✕ или добавить. Эти правки только для этого мероприятия; ✎ меняет блюдо в справочнике для всех.</p>
+        <div id="layout"></div>
+        <div class="layout-foot"><button class="btn" data-tab="list">Дальше: список продуктов →</button></div>
+      </div>
+
+      <div id="paneList">
       <div class="totals" id="totals"></div>
       <p class="hint" id="groupHint" hidden></p>
       <div id="sections"></div>
@@ -199,6 +235,7 @@
       <p class="hint">Количество посчитано на число гостей по раскладке прошлых мероприятий (майский ретрит и меню 2023–2026).
         Любую цифру можно исправить — исправленные поля подсвечены, ↺ возвращает расчёт. Цены «май 2026» — с майского ретрита;
         цены с пометкой <b style="color:var(--warn)">среднее</b> — средние по старым закупам, их стоит уточнить.</p>
+      </div>
     </main>
   </div>
 </div>
@@ -305,7 +342,8 @@
   ];
 
   // ── состояние ──
-  const fresh = () => ({ event: "", guests: CFG.DEFAULT_GUESTS || 50, dishes: [], edits: {}, extra: [], extraKeys: [], webapp: "", cook: "" });
+  // dishEdits: правки состава блюд на это мероприятие — { idБлюда: { ключПродукта: количество на гостя (0 — убран) } }
+  const fresh = () => ({ event: "", guests: CFG.DEFAULT_GUESTS || 50, dishes: [], edits: {}, dishEdits: {}, extra: [], extraKeys: [], webapp: "", cook: "", tab: "layout" });
   let S = fresh();
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
   if (location.hash.length > 1) {
@@ -315,6 +353,7 @@
     if (h.get("e")) S.event = h.get("e");
   }
   S.dishes = S.dishes.filter(id => byId[id]);
+  S.dishEdits ||= {};
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const money = (n) => Math.round(n || 0).toLocaleString("ru-RU") + " ₸";
@@ -331,6 +370,21 @@
   // 100–250 — около +8%, от 250 — как в раскладке. Поправка только на блюда (не на посуду и базовые специи).
   const groupK = (g) => Math.min(1.3, Math.max(1, Math.pow(250 / Math.max(1, g), 0.15)));
 
+  // Состав блюда для этого мероприятия: справочник + правки из раскладки. { ключ: количество на гостя }
+  function baseIngr(d) {
+    const out = {};
+    for (const src of [d.products || {}, d.spices || {}])
+      for (const [k, q] of Object.entries(src)) out[k] = (out[k] || 0) + q;
+    return out;
+  }
+  function dishIngr(d) {
+    const out = baseIngr(d);
+    for (const [k, q] of Object.entries(S.dishEdits[d.id] || {})) { if (q > 0) out[k] = q; else delete out[k]; }
+    for (const k of Object.keys(out)) if (!CAT[k]) delete out[k];
+    return out;
+  }
+  const priceOf = (k) => { const e = S.edits[k]; return e && e.price != null ? e.price : (CAT[k]?.price || 0); };
+
   function computeRows() {
     const rows = {};
     const g = S.guests, boost = groupK(g);
@@ -341,8 +395,7 @@
     };
     for (const id of S.dishes) {
       const d = byId[id];
-      for (const [p, q] of Object.entries(d.products || {})) add(p, q * g * boost, d.name);
-      for (const [p, q] of Object.entries(d.spices || {})) add(p, q * g * boost, d.name);
+      for (const [p, q] of Object.entries(dishIngr(d))) add(p, q * g * boost, d.name);
     }
     // специи: базовый набор по норме ретрита (упаковок на 100 гостей за приём пищи);
     // пачками — минимум 1 упаковка, весовые (барбарис, паприка) — по расчёту
@@ -424,10 +477,76 @@
     </tr>`;
   }
 
+  // ── отрисовка: раскладка по блюдам ──
+  const fmtTot = (q) => (q < 0.1 ? Math.round(q * 1000) / 1000 : Math.round(q * 100) / 100).toLocaleString("ru-RU");
+  function perGuest(q, unit) {
+    if (unit === "кг") return (Math.round(q * 1000 * 10) / 10).toLocaleString("ru-RU") + " г";
+    if (unit === "л") return (Math.round(q * 1000 * 10) / 10).toLocaleString("ru-RU") + " мл";
+    return fmtTot(q) + " " + unit;
+  }
+  const secOrder = (k) => { const i = SECTION_NAMES.indexOf(CAT[k]?.section); return i < 0 ? 99 : i; };
+  function renderLayout() {
+    const g = S.guests, mult = g * groupK(g);
+    $("layoutGuests").textContent = g + " " + (g % 10 === 1 && g % 100 !== 11 ? "гостя" : "гостей");
+    if (!S.dishes.length) {
+      $("layout").innerHTML = `<section class="card"><div class="empty">Отметьте блюда в справочнике слева — здесь появится раскладка каждого блюда.</div></section>`;
+      return;
+    }
+    $("layout").innerHTML = S.dishes.map(id => {
+      const d = byId[id], base = baseIngr(d), ov = S.dishEdits[id] || {}, ing = dishIngr(d);
+      const keys = [...new Set([...Object.keys(base), ...Object.keys(ing)])].filter(k => CAT[k])
+        .sort((a, b) => secOrder(a) - secOrder(b) || CAT[a].name.localeCompare(CAT[b].name, "ru"));
+      let cost = 0;
+      const rowsHtml = keys.map(k => {
+        const c = CAT[k], removed = !(ing[k] > 0), added = !(k in base), edited = !removed && !added && k in ov;
+        const tot = removed ? (base[k] || 0) * mult : ing[k] * mult;
+        const sum = removed ? 0 : tot * priceOf(k);
+        cost += sum;
+        return `<tr class="${removed ? "removed" : added ? "added" : ""}">
+          <td><div class="pn">${esc(c.name)}</div><div class="uses">${esc(c.section)}</div></td>
+          <td class="num gram hide-sm">${removed ? "" : perGuest(ing[k], c.unit)}</td>
+          <td class="num">${removed ? `<span class="unit">убрано</span>`
+            : `<input class="qin ${edited || added ? "edited" : ""}" data-dq="${id}|${k}" value="${fmtTot(tot)}" inputmode="decimal" aria-label="Количество: ${esc(c.name)}"><span class="unit">${esc(c.unit)}</span>`}
+            ${edited ? `<button class="reset" data-dqreset="${id}|${k}" title="Вернуть как в справочнике: ${fmtTot(base[k] * mult)}">↺</button>` : ""}</td>
+          <td class="num hide-sm">${removed ? "" : money(sum)}</td>
+          <td style="width:32px">${removed
+            ? `<button class="reset" data-dqreset="${id}|${k}" title="Вернуть продукт в блюдо">↺</button>`
+            : `<button class="x" data-drm="${id}|${k}" title="Убрать из блюда" aria-label="Убрать ${esc(c.name)}">✕</button>`}</td>
+        </tr>`;
+      }).join("");
+      const changed = Object.keys(ov).length;
+      return `<section class="card dcard">
+        <h2><span class="dn">${esc(d.name)}</span>
+          <span class="dmeta">${esc(d.category || "")}${changed ? ` · <span style="color:var(--accent)">изменено для этого мероприятия</span>` : ""}</span>
+          <span class="dcost">≈ ${money(cost)}</span>
+          <button class="edit" data-edit="${id}" title="Изменить блюдо в справочнике (для всех)" aria-label="Изменить ${esc(d.name)} в справочнике">✎</button>
+          <button class="x" data-undish="${id}" title="Убрать блюдо из меню" aria-label="Убрать ${esc(d.name)} из меню">✕</button></h2>
+        ${d.note ? `<div class="dnote">${esc(d.note)}</div>` : ""}
+        ${keys.length ? `<table><thead><tr><th>Продукт</th><th class="num hide-sm">На гостя</th><th class="num">На ${g} гостей</th><th class="num hide-sm">≈ Сумма</th><th></th></tr></thead>
+          <tbody>${rowsHtml}</tbody></table>` : `<div class="empty">В блюде нет продуктов</div>`}
+        <div class="dadd">
+          <input class="an" list="prodList" placeholder="+ продукт в блюдо…" data-daddname="${id}" autocomplete="off" aria-label="Добавить продукт">
+          <input class="aq" placeholder="кол-во" inputmode="decimal" data-daddqty="${id}" aria-label="Количество на ${g} гостей">
+          <button class="btn ghost small" data-dadd="${id}">Добавить</button>
+          ${changed ? `<button class="btn ghost small" data-dreset="${id}" title="Вернуть состав как в справочнике">Сбросить правки</button>` : ""}
+        </div>
+      </section>`;
+    }).join("");
+  }
+
   function render() {
     $("guests").value = S.guests;
     $("eventName").value = S.event;
     renderDishes();
+    if (S.tab !== "list") S.tab = "layout";
+    $("paneLayout").hidden = S.tab !== "layout";
+    $("paneList").hidden = S.tab !== "list";
+    $("tabLayout").classList.toggle("on", S.tab === "layout");
+    $("tabList").classList.toggle("on", S.tab === "list");
+    $("tabLayout").setAttribute("aria-selected", S.tab === "layout");
+    $("tabList").setAttribute("aria-selected", S.tab === "list");
+    fillLists();
+    renderLayout();
     const rows = computeRows();
     let grand = 0;
     const totals = [];
@@ -452,6 +571,10 @@
     const pct = Math.round((groupK(S.guests) - 1) * 100);
     $("groupHint").hidden = !(pct > 0 && S.dishes.length);
     $("groupHint").textContent = `Продукты на блюда посчитаны с запасом +${pct}%: на мероприятиях меньше 250 гостей на человека обычно уходит больше.`;
+    const n = S.dishes.length, n10 = n % 10, n100 = n % 100;
+    const word = n10 === 1 && n100 !== 11 ? "блюдо" : n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14) ? "блюда" : "блюд";
+    $("tabLayoutN").textContent = n ? `${n} ${word}` : "выберите блюда";
+    $("tabListN").textContent = rows.filter(r => !r.off && r.qty > 0).length + " поз. · " + money(grand);
     save();
   }
 
@@ -467,6 +590,31 @@
     const t = e.target;
     const editBtn = t.closest && t.closest("[data-edit]");
     if (editBtn) { openDishEditor(editBtn.dataset.edit); return; }
+    const tabBtn = t.closest && t.closest("[data-tab]");
+    if (tabBtn) {
+      S.tab = tabBtn.dataset.tab; render();
+      if ($("tabLayout").getBoundingClientRect().top < 0) $("tabLayout").scrollIntoView({ block: "start" });
+      return;
+    }
+    const pair = (v) => v.split("|");
+    const dEd = (id) => (S.dishEdits[id] ||= {});
+    if (t.dataset.drm) { const [id, k] = pair(t.dataset.drm); dEd(id)[k] = 0; render(); return; }
+    if (t.dataset.dqreset) {
+      const [id, k] = pair(t.dataset.dqreset);
+      if (S.dishEdits[id]) { delete S.dishEdits[id][k]; if (!Object.keys(S.dishEdits[id]).length) delete S.dishEdits[id]; }
+      render(); return;
+    }
+    if (t.dataset.dreset) { delete S.dishEdits[t.dataset.dreset]; render(); return; }
+    if (t.dataset.dadd) {
+      const id = t.dataset.dadd;
+      const nameEl = document.querySelector(`[data-daddname="${id}"]`), qtyEl = document.querySelector(`[data-daddqty="${id}"]`);
+      const k = keyByName()[nameEl.value.trim().toLowerCase()];
+      const q = toNum(qtyEl.value);
+      if (!k) { toast(nameEl.value.trim() ? "Такого продукта нет в справочнике — выберите из подсказок или добавьте в «Продукты и цены»" : "Выберите продукт"); nameEl.focus(); return; }
+      if (!(q > 0)) { toast(`Укажите количество, ${CAT[k].unit}, на ${S.guests} гостей`); qtyEl.focus(); return; }
+      dEd(id)[k] = q / (S.guests * groupK(S.guests));
+      render(); return;
+    }
     if (t.dataset.cat) { catFilter = t.dataset.cat; renderDishes(); }
     else if (t.dataset.undish) { S.dishes = S.dishes.filter(x => x !== t.dataset.undish); render(); }
     else if (t.dataset.resetq) { const ed = S.edits[t.dataset.resetq]; if (ed) delete ed.qty; render(); }
@@ -479,7 +627,18 @@
     if (t.dataset.dish) {
       S.dishes = t.checked ? [...S.dishes, t.dataset.dish] : S.dishes.filter(x => x !== t.dataset.dish);
       render();
-    } else if (t.dataset.off) { ed(t.dataset.off).off = !t.checked; render(); }
+    } else if (t.dataset.dq) {
+      const [id, k] = t.dataset.dq.split("|"), v = val(t.value);
+      if (v != null) {
+        const pg = v / (S.guests * groupK(S.guests));
+        const ov = (S.dishEdits[id] ||= {});
+        // вернули то же число, что в справочнике, — правку не храним
+        if (k in baseIngr(byId[id]) && Math.abs(baseIngr(byId[id])[k] - pg) < 1e-9) delete ov[k]; else ov[k] = pg;
+        if (!Object.keys(ov).length) delete S.dishEdits[id];
+      }
+      render();
+    }
+    else if (t.dataset.off) { ed(t.dataset.off).off = !t.checked; render(); }
     else if (t.dataset.qty) { const v = val(t.value); if (v != null) ed(t.dataset.qty).qty = v; render(); }
     else if (t.dataset.price) { const v = val(t.value); if (v != null) ed(t.dataset.price).price = v; render(); }
     else if (t.dataset.addsel) {
@@ -498,6 +657,12 @@
       }
       render();
     }
+  });
+
+  // Enter в строке «+ продукт в блюдо» — то же, что «Добавить»
+  document.addEventListener("keydown", (e) => {
+    const id = e.key === "Enter" && (e.target.dataset.daddqty || e.target.dataset.daddname);
+    if (id) { e.preventDefault(); document.querySelector(`[data-dadd="${id}"]`).click(); }
   });
 
   // ── экспорт ──
@@ -542,6 +707,25 @@
     const MONEY = '#,##0 "₸"';
 
     const summary = wb.addWorksheet("Сводка", { views: [{ showGridLines: false }] });
+
+    // раскладка по блюдам — для повара
+    const lay = wb.addWorksheet("Раскладка", { views: [{ showGridLines: false }], pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0 } });
+    lay.columns = [{ width: 40 }, { width: 12 }, { width: 8 }, { width: 14 }];
+    lay.addRow(["Раскладка по блюдам"]).font = { bold: true, size: 15, color: { argb: accent } };
+    lay.addRow([title + " · " + date]).font = { color: { argb: "FF8A7F76" } };
+    const mult = S.guests * groupK(S.guests);
+    for (const id of S.dishes) {
+      const d = byId[id], ing = dishIngr(d);
+      lay.addRow([]);
+      const h = lay.addRow([d.name, "Кол-во", "Ед.", "На гостя"]);
+      h.eachCell(c => { c.font = { bold: true, color: { argb: "FFFFFFFF" } }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: accent } }; c.border = box; });
+      Object.keys(ing).sort((a, b) => secOrder(a) - secOrder(b) || CAT[a].name.localeCompare(CAT[b].name, "ru")).forEach(k => {
+        const c = CAT[k], q = ing[k] * mult;
+        const r = lay.addRow([c.name, q < 0.1 ? Math.round(q * 1000) / 1000 : Math.round(q * 100) / 100, c.unit, perGuest(ing[k], c.unit)]);
+        r.eachCell({ includeEmpty: true }, x => { x.border = box; });
+      });
+    }
+
     const totals = [];  // [раздел, ссылка на ячейку итога]
     for (const tab of EXCEL_TABS) {
       const ws = wb.addWorksheet(tab, { views: [{ state: "frozen", ySplit: 2 }], pageSetup: { fitToPage: true, fitToWidth: 1, fitToHeight: 0, orientation: "portrait" } });
@@ -648,7 +832,7 @@
       const x = await buildExcel();
       const res = await api({ action: "xlsxToSheet", name: x.name.replace(/\.xlsx$/, ""), base64: await toBase64(x.blob) });
       if (win) win.location.href = res.url; else window.open(res.url, "_blank");
-      showDoc(`<p>Google Таблица создана — листы: Сводка, Молочка, Бакалея, Овощи и фрукты, Остальное.
+      showDoc(`<p>Google Таблица создана — листы: Сводка, Раскладка, Молочка, Бакалея, Овощи и фрукты, Остальное.
         Доступ по ссылке — редактировать могут все.</p>
         <a class="doclink" href="${esc(res.url)}" target="_blank" rel="noopener">${esc(res.url)}</a>`);
     } catch (err) {
