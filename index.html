@@ -4,64 +4,295 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Воскресный пир — меню и закуп</title>
-<meta name="description" content="Меню и список закупа: повар выбирает блюда и число гостей, закупщик правит цены, список уходит в Google Docs">
+<meta name="description" content="Пошагово: дата и гости → блюда → ингредиенты → список продуктов → афиша. Цены 2026 года по сезонам.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪷</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #faf7f2; --card: #fff; --text: #2a2420; --muted: #8a7f76; --line: #ece5dc; --soft: #f6f1ea;
-    --accent: #c2562b; --accent-soft: #fbe9df; --ok: #2f8f5b; --warn: #a86a00; --warn-soft: #fff3d6; --off: #b9b0a7;
-    --shadow: 0 1px 2px rgba(60,40,20,.06), 0 4px 16px rgba(60,40,20,.05); --r: 14px;
+    --bg: #faf6f0; --card: #fff; --text: #2b211c; --muted: #8a7b70; --line: #eee2d6; --soft: #f6efe6;
+    --accent: #8e1b2f; --accent-2: #b4314a; --accent-soft: #f7e6e8; --gold: #c9a24a; --gold-soft: #fbf3df;
+    --ok: #2f8f5b; --warn: #a86a00; --warn-soft: #fff3d6; --off: #b9b0a7;
+    --shadow: 0 1px 2px rgba(60,30,20,.06), 0 6px 20px rgba(60,30,20,.06);
+    --shadow-lg: 0 10px 40px rgba(60,20,20,.16); --r: 16px;
+    --ease: cubic-bezier(.2,.8,.2,1); --spring: cubic-bezier(.34,1.56,.64,1);
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #1b1815; --card: #24201c; --text: #f1ebe4; --muted: #a59a8f; --line: #38312b; --soft: #2c2722;
-      --accent: #e8794a; --accent-soft: #3a261c; --ok: #5cc28a; --warn: #f0b44a; --warn-soft: #3a2f17; --off: #6b625a;
-      --shadow: 0 1px 2px rgba(0,0,0,.3);
+      --bg: #1a1513; --card: #241d1a; --text: #f3ebe4; --muted: #a8998d; --line: #3a302b; --soft: #2d2521;
+      --accent: #e0697f; --accent-2: #f08da0; --accent-soft: #3c2228; --gold: #e2c06a; --gold-soft: #33291a;
+      --ok: #5cc28a; --warn: #f0b44a; --warn-soft: #3a2f17; --off: #6b625a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3); --shadow-lg: 0 10px 40px rgba(0,0,0,.5);
     }
   }
+  :root[data-theme="dark"] {
+    --bg: #1a1513; --card: #241d1a; --text: #f3ebe4; --muted: #a8998d; --line: #3a302b; --soft: #2d2521;
+    --accent: #e0697f; --accent-2: #f08da0; --accent-soft: #3c2228; --gold: #e2c06a; --gold-soft: #33291a;
+    --ok: #5cc28a; --warn: #f0b44a; --warn-soft: #3a2f17; --off: #6b625a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3); --shadow-lg: 0 10px 40px rgba(0,0,0,.5);
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 "Segoe UI", Roboto, Arial, sans-serif; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 80px; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 Manrope, "Segoe UI", Roboto, Arial, sans-serif; }
   input, select, button, textarea { font: inherit; color: inherit; }
-  header { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  h1 { font-size: 26px; margin: 0; letter-spacing: -.01em; }
-  .meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .field { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 6px 10px; box-shadow: var(--shadow); }
-  .field label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-  .field input { border: none; background: transparent; outline: none; }
-  #guests { width: 64px; font-size: 18px; font-weight: 700; text-align: center; }
-  #eventName { width: 210px; }
-  .step { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--soft); cursor: pointer; }
-  .icon-btn { border: 1px solid var(--line); background: var(--card); border-radius: 10px; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow); }
-  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
-  .grid > * { min-width: 0; }
-  @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 16px; }
-  .card + .card { margin-top: 16px; }
-  h2 { font-size: 16px; margin: 0 0 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-  h2 small { color: var(--muted); font-weight: 500; font-size: 12.5px; }
-  .search { width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); outline: none; margin-bottom: 8px; }
-  .search:focus { border-color: var(--accent); }
-  .cats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-  .cat { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 3px 10px; font-size: 12.5px; cursor: pointer; color: var(--muted); }
-  .cat.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .dlist { max-height: 62vh; overflow: auto; margin: 0 -6px; padding: 0 6px; }
-  @media (max-width: 920px) { .dlist { max-height: 46vh; } }
-  .dgroup { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin: 10px 0 4px; }
-  .dish { display: flex; gap: 10px; align-items: flex-start; padding: 8px; border-radius: 10px; cursor: pointer; }
-  .dish:hover { background: var(--soft); }
-  .dish.on { background: var(--accent-soft); }
-  .dish input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); flex: none; }
-  .dish .nm { font-weight: 600; }
-  .dish .sub { font-size: 12px; color: var(--muted); }
-  .tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 0 6px; border-radius: 999px; background: var(--soft); color: var(--muted); margin-left: 4px; vertical-align: 1px; }
-  .dish-row { display: flex; align-items: flex-start; gap: 2px; }
-  .dish-row .dish { flex: 1; min-width: 0; }
-  .edit { border: none; background: transparent; color: var(--muted); cursor: pointer; width: 32px; height: 32px; border-radius: 8px; font-size: 15px; margin-top: 4px; }
-  .edit:hover { background: var(--soft); color: var(--accent); }
+  button { -webkit-tap-highlight-color: transparent; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px 140px; }
+  h1, h2, h3, .serif { font-family: "Cormorant Garamond", Georgia, serif; }
+
+  /* ── верхний блок: событие, дата, гости, сезон ── */
+  .top { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line); }
+  .top-in { max-width: 1180px; margin: 0 auto; padding: 12px 16px 0; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+  .brand { display: flex; align-items: baseline; gap: 8px; margin-right: auto; }
+  .brand b { font-family: "Cormorant Garamond", Georgia, serif; font-size: 28px; font-weight: 700; color: var(--accent); letter-spacing: -.01em; }
+  .brand span { font-size: 24px; }
+  .field { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 6px 10px; box-shadow: var(--shadow); transition: border-color .2s, box-shadow .2s; }
+  .field:focus-within { border-color: var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 20%, transparent); }
+  .field label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .field input { border: none; background: transparent; outline: none; min-width: 0; }
+  #eventName { width: 150px; }
+  #eventDate { width: 128px; }
+  @media (max-width: 1340px) { .season small { display: none; } }
+  @media (min-width: 1000px) { .bar { flex-wrap: nowrap; } .brand { white-space: nowrap; } }
+  #guests { width: 58px; font-size: 18px; font-weight: 800; text-align: center; }
+  .stepbtn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--soft); cursor: pointer;
+    font-size: 17px; line-height: 1; transition: transform .15s var(--spring), background .2s; }
+  .stepbtn:hover { background: var(--gold-soft); }
+  .stepbtn:active { transform: scale(.86); }
+  .season { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--card); border-radius: 999px;
+    padding: 7px 12px; cursor: pointer; font-weight: 700; font-size: 13px; box-shadow: var(--shadow); transition: transform .2s var(--spring); }
+  .season:hover { transform: translateY(-1px); }
+  .season small { color: var(--muted); font-weight: 600; }
+  .season.manual { border-color: var(--gold); }
+  .icon-btn { border: 1px solid var(--line); background: var(--card); border-radius: 12px; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow); }
+
+  /* ── шаги ── */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 10px; position: relative; }
+  .stp { border: none; background: none; cursor: pointer; padding: 8px 4px 12px; display: flex; align-items: center; gap: 8px; justify-content: center;
+    color: var(--muted); font-weight: 700; font-size: 14px; position: relative; transition: color .25s; }
+  .stp i { font-style: normal; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 13px;
+    border: 2px solid var(--line); background: var(--card); transition: all .35s var(--ease); flex: none; }
+  .stp.done i { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .stp.on { color: var(--text); }
+  .stp.on i { background: var(--accent); border-color: var(--accent); color: #fff; transform: scale(1.12); box-shadow: 0 0 0 5px var(--accent-soft); }
+  .stp small { display: block; font-weight: 600; font-size: 11.5px; color: var(--muted); }
+  .stp .lbl { text-align: left; line-height: 1.15; }
+  .progress { position: absolute; left: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--accent)); border-radius: 3px;
+    transition: width .5s var(--ease); }
+  @media (max-width: 720px) {
+    .stp .lbl small { display: none; } .stp { font-size: 12px; gap: 5px; flex-direction: column; padding-bottom: 8px; } .stp .lbl { text-align: center; }
+    #eventName { width: 130px; } .brand b { font-size: 22px; }
+  }
+
+  /* ── панели шагов ── */
+  .pane { animation: paneIn .45s var(--ease) both; padding-top: 18px; }
+  .pane[hidden] { display: none; }
+  .pane.back { animation-name: paneInBack; }
+  @keyframes paneIn { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+  @keyframes paneInBack { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
+  .ph { font-size: 30px; margin: 0; font-weight: 700; letter-spacing: -.01em; }
+  .ph-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .ph-row .grow { flex: 1; }
+  .hint { font-size: 12.5px; color: var(--muted); }
+
+  /* ── цветные блоки разделов ── */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; transition: all .4s var(--ease); }
+  .tile { --c: #c9a24a; position: relative; overflow: hidden; border: none; cursor: pointer; text-align: left; color: #fff; border-radius: 20px;
+    padding: 16px 16px 14px; min-height: 118px; display: flex; flex-direction: column; justify-content: space-between;
+    background: linear-gradient(140deg, color-mix(in srgb, var(--c) 92%, #fff) 0%, var(--c) 55%, color-mix(in srgb, var(--c) 75%, #000) 100%);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--c) 35%, transparent); transition: transform .35s var(--spring), box-shadow .3s, min-height .4s var(--ease), opacity .3s; }
+  .tile::after { content: ""; position: absolute; inset: 0; background: radial-gradient(120px 80px at var(--mx, 80%) var(--my, 0%), rgba(255,255,255,.35), transparent 70%);
+    opacity: 0; transition: opacity .3s; }
+  .tile:hover { transform: translateY(-4px) rotate(-.4deg); box-shadow: 0 14px 30px color-mix(in srgb, var(--c) 45%, transparent); }
+  .tile:hover::after { opacity: 1; }
+  .tile:active { transform: scale(.97); }
+  .tile .em { font-size: 38px; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); transition: transform .4s var(--spring); }
+  .tile:hover .em { transform: scale(1.15) rotate(-6deg); }
+  .tile b { font-size: 18px; font-weight: 800; letter-spacing: -.01em; text-shadow: 0 1px 2px rgba(0,0,0,.2); }
+  .tile .cnt { font-size: 12px; opacity: .9; font-weight: 600; }
+  .tile .sel { position: absolute; top: 12px; right: 12px; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 13px; background: #fff;
+    color: var(--c); font-weight: 800; font-size: 13px; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    transform: scale(0); transition: transform .35s var(--spring); }
+  .tile .sel.show { transform: scale(1); }
+  .tiles.compact { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .tiles.compact .tile { min-height: 62px; padding: 10px 12px; flex-direction: row; align-items: center; gap: 8px; justify-content: flex-start; border-radius: 14px; }
+  .tiles.compact .tile .em { font-size: 24px; }
+  .tiles.compact .tile b { font-size: 13.5px; }
+  .tiles.compact .tile .cnt { display: none; }
+  .tiles.compact .tile .sel { top: 6px; right: 6px; min-width: 20px; height: 20px; font-size: 11px; }
+  .tiles.compact .tile:not(.on) { opacity: .55; filter: saturate(.7); }
+  .tiles.compact .tile.on { outline: 3px solid color-mix(in srgb, var(--c) 40%, transparent); outline-offset: 2px; opacity: 1; }
+
+  /* ── блюда раздела ── */
+  .catview { margin-top: 18px; }
+  .catview[hidden] { display: none; }
+  .cv-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .cv-head h2 { margin: 0; font-size: 26px; }
+  .cv-head .grow { flex: 1; }
+  .search { padding: 10px 14px 10px 36px; border: 1px solid var(--line); border-radius: 12px; background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238a7b70' stroke-width='2'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 4 4'/%3E%3C/svg%3E") no-repeat 12px center;
+    outline: none; width: 260px; max-width: 100%; transition: border-color .2s, box-shadow .2s, width .3s var(--ease); }
+  .search:focus { border-color: var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 18%, transparent); width: 320px; }
+  .grid-d { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .dc { --c: #c9a24a; position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; cursor: pointer;
+    text-align: left; padding: 0; display: flex; flex-direction: column; box-shadow: var(--shadow);
+    transition: transform .3s var(--spring), box-shadow .3s, border-color .3s; animation: cardIn .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 28ms); }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+  .dc:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .dc:active { transform: scale(.98); }
+  .dc .pic { position: relative; aspect-ratio: 4 / 3; overflow: hidden;
+    background: radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--c) 35%, #fff), color-mix(in srgb, var(--c) 70%, #000) 120%); display: grid; place-items: center; }
+  .dc .pic .em { font-size: 54px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.25)); transition: transform .4s var(--spring); }
+  .dc:hover .pic .em { transform: scale(1.12) rotate(-5deg); }
+  .dc .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s, transform .6s var(--ease); }
+  .dc .pic img.ld { opacity: 1; }
+  .dc:hover .pic img { transform: scale(1.06); }
+  .dc .body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .dc .nm { font-weight: 800; font-size: 14.5px; line-height: 1.25; }
+  .dc .cp { font-size: 12px; color: var(--muted); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .dc .meta { margin-top: auto; padding-top: 6px; display: flex; gap: 6px; align-items: center; font-size: 11.5px; color: var(--muted); }
+  .dc .meta b { color: var(--text); font-weight: 700; }
+  .dc .add { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(255,255,255,.92); color: var(--accent); font-size: 22px; font-weight: 700; box-shadow: 0 3px 10px rgba(0,0,0,.2);
+    transition: transform .35s var(--spring), background .25s, color .25s; }
+  .dc:hover .add { transform: scale(1.12); }
+  .dc.on { border-color: var(--c); box-shadow: 0 0 0 2px var(--c), var(--shadow-lg); }
+  .dc.on .add { background: var(--c); color: #fff; transform: scale(1.05); }
+  .dc.on:hover .add { transform: scale(1.1); }
+  .dc .ed { position: absolute; top: 10px; left: 10px; width: 30px; height: 30px; border-radius: 50%; border: none; background: rgba(0,0,0,.35); color: #fff;
+    cursor: pointer; opacity: 0; transition: opacity .2s; font-size: 13px; }
+  .dc:hover .ed, .dc:focus-within .ed { opacity: 1; }
+  @media (hover: none) { .dc .ed { opacity: .8; } }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: var(--soft); color: var(--muted); }
   .tag.mine { background: var(--accent-soft); color: var(--accent); }
-  .ref-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-  dialog.wide { max-width: 760px; }
+  .empty { color: var(--muted); font-size: 13.5px; padding: 10px 0; }
+  .empty.big { text-align: center; padding: 40px 10px; font-size: 15px; }
+
+  /* ── нижний блок: выбранные блюда ── */
+  .tray { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; transform: translateY(110%); transition: transform .45s var(--ease); }
+  .tray.show { transform: none; }
+  .tray-in { max-width: 1180px; margin: 0 auto 12px; padding: 12px 14px; background: color-mix(in srgb, var(--card) 94%, transparent); backdrop-filter: blur(14px);
+    border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow-lg); display: flex; gap: 12px; align-items: center; }
+  @media (max-width: 1212px) { .tray-in { margin: 0 16px 12px; } }
+  .tray .chips { flex: 1; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin; padding: 2px; min-width: 0; }
+  .tray .sum { text-align: right; white-space: nowrap; font-size: 12px; color: var(--muted); }
+  .tray .sum b { display: block; font-size: 17px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .chip { --c: #c9a24a; display: inline-flex; align-items: center; gap: 6px; background: color-mix(in srgb, var(--c) 14%, var(--card)); color: var(--text); border-radius: 999px;
+    padding: 3px 4px 3px 4px; font-size: 13px; white-space: nowrap; border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);
+    animation: chipIn .4s var(--spring) both; }
+  .chip .th { width: 26px; height: 26px; border-radius: 50%; background: var(--c) center / cover; display: grid; place-items: center; font-size: 14px; flex: none; }
+  .chip button { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 14px; width: 22px; height: 22px; border-radius: 50%; }
+  .chip button:hover { color: var(--accent); background: var(--accent-soft); }
+  @keyframes chipIn { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+  .chip.out { animation: chipOut .25s var(--ease) both; }
+  @keyframes chipOut { to { opacity: 0; transform: scale(.6); } }
+  .bump { animation: bump .45s var(--spring); }
+  @keyframes bump { 40% { transform: scale(1.18); } }
+  .fly { position: fixed; z-index: 60; border-radius: 50%; pointer-events: none; background: var(--c) center / cover; box-shadow: 0 6px 20px rgba(0,0,0,.3);
+    display: grid; place-items: center; font-size: 22px; }
+
+  /* ── кнопки ── */
+  .btn { border: none; border-radius: 12px; padding: 11px 18px; font-weight: 800; cursor: pointer; background: var(--accent); color: #fff; position: relative; overflow: hidden;
+    transition: transform .2s var(--spring), box-shadow .25s, background .2s, opacity .2s; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 38%, transparent); }
+  .btn:active { transform: scale(.97); }
+  .btn.small { padding: 7px 12px; font-size: 13px; border-radius: 10px; }
+  .btn.ghost { background: var(--card); color: var(--accent); border: 1px solid var(--line); box-shadow: none; }
+  .btn.ghost:hover { border-color: var(--gold); }
+  .btn.gold { background: linear-gradient(135deg, #e2c06a, #b8892f); color: #2b1a10; box-shadow: 0 4px 14px rgba(185,137,47,.35); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn .rp { position: absolute; border-radius: 50%; background: rgba(255,255,255,.45); transform: scale(0); animation: rp .6s ease-out; pointer-events: none; }
+  @keyframes rp { to { transform: scale(4); opacity: 0; } }
+  .btn.big { padding: 13px 22px; font-size: 15px; }
+
+  /* ── карточки, таблицы (шаги 2–3) ── */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 16px; }
+  .card + .card { margin-top: 14px; }
+  h2.ch { font-size: 21px; margin: 0 0 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  h2.ch small { color: var(--muted); font-weight: 600; font-size: 12.5px; font-family: Manrope, sans-serif; }
+  .dcard { animation: cardIn .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 50ms); border-left: 5px solid var(--c, var(--gold)); }
+  .dcard h2 { align-items: center; }
+  .dcard h2 .th { width: 42px; height: 42px; border-radius: 12px; background: var(--c) center / cover; display: inline-grid; place-items: center; font-size: 22px; flex: none; }
+  .dcard h2 .dn { font-size: 22px; }
+  .dcard h2 .dmeta { color: var(--muted); font-weight: 600; font-size: 12.5px; flex: 1; font-family: Manrope, sans-serif; }
+  .dcard h2 .dcost { font-variant-numeric: tabular-nums; font-family: Manrope, sans-serif; font-size: 15px; }
+  .dcard .dnote { font-size: 12.5px; color: var(--muted); margin: -6px 0 8px; }
+  .dcard .gram { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+  .dcard tr.removed td { color: var(--off); }
+  .dcard tr.removed .pn { text-decoration: line-through; font-weight: 400; }
+  .dcard tr.added .pn::after { content: " · добавлено"; color: var(--accent); font-weight: 500; font-size: 11.5px; }
+  .dadd { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+  .dadd input { padding: 7px 9px; border: 1px solid var(--line); border-radius: 9px; background: var(--soft); min-width: 0; outline: none; }
+  .dadd input:focus { border-color: var(--gold); }
+  .dadd .an { flex: 1 1 200px; }
+  .dadd .aq { width: 90px; text-align: right; }
+  .totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .tot { background: var(--card); padding: 12px 14px; }
+  .tot span { display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .tot b { font-size: 18px; font-variant-numeric: tabular-nums; }
+  .tot.main { background: linear-gradient(135deg, var(--accent-soft), var(--gold-soft)); }
+  .tot.main b { color: var(--accent); font-size: 24px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background .2s; }
+  tbody tr:hover { background: color-mix(in srgb, var(--gold-soft) 60%, transparent); }
+  td.chk { width: 28px; } td.chk input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+  .pn { font-weight: 700; }
+  .uses { font-size: 12px; color: var(--muted); }
+  .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .qin, .pin { width: 84px; text-align: right; padding: 6px 8px; border: 1px solid var(--line); border-radius: 9px; background: var(--soft); outline: none; transition: border-color .2s, background .2s; }
+  .qin:focus, .pin:focus { border-color: var(--gold); background: var(--card); }
+  .qin.edited, .pin.edited { border-color: var(--accent); background: var(--accent-soft); }
+  .unit { color: var(--muted); font-size: 13px; padding-left: 4px; }
+  .src { display: block; font-size: 10.5px; color: var(--muted); text-align: right; }
+  .src.old { color: var(--warn); font-weight: 700; }
+  .src.season { color: var(--ok); }
+  .reset { border: none; background: transparent; color: var(--accent); cursor: pointer; font-size: 13px; padding: 0 2px; }
+  .x { border: none; background: transparent; color: var(--muted); font-size: 16px; cursor: pointer; width: 30px; height: 30px; border-radius: 8px; transition: background .2s, color .2s; }
+  .x:hover { background: var(--accent-soft); color: var(--accent); }
+  .edit { border: none; background: transparent; color: var(--muted); cursor: pointer; width: 32px; height: 32px; border-radius: 8px; font-size: 15px; }
+  .edit:hover { background: var(--soft); color: var(--accent); }
+  tr.off td { color: var(--off); } tr.off .pn { text-decoration: line-through; } tr.off input.qin, tr.off input.pin { opacity: .5; }
+  .addrow { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .addrow select { padding: 7px 9px; border: 1px solid var(--line); border-radius: 9px; background: var(--soft); flex: 1 1 200px; min-width: 0; }
+  .foot { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 0;
+    background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); margin-top: 14px; }
+  .foot .grow { flex: 1; }
+
+  /* ── афиша ── */
+  .poster-grid { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 18px; align-items: start; }
+  .poster-grid > * { min-width: 0; }
+  @media (max-width: 900px) { .poster-grid { grid-template-columns: 1fr; } }
+  .pctl label { display: block; font-size: 11.5px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin: 12px 0 4px; }
+  .pctl input, .pctl select, .pctl textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); outline: none; }
+  .pctl input:focus, .pctl textarea:focus { border-color: var(--gold); }
+  .pctl .fmts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .fmt { border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 8px; cursor: pointer; text-align: left; font-size: 12.5px; transition: all .2s; }
+  .fmt b { display: block; font-size: 13.5px; }
+  .fmt.on { border-color: var(--accent); background: var(--accent-soft); }
+  .pdesc { display: grid; gap: 6px; max-height: 360px; overflow: auto; padding-right: 4px; }
+  .pdesc div { font-size: 12px; }
+  .pdesc textarea { font-size: 12.5px; min-height: 44px; resize: vertical; }
+  .canvas-box { background: repeating-conic-gradient(var(--soft) 0 25%, var(--card) 0 50%) 0 0 / 22px 22px; border: 1px solid var(--line); border-radius: 16px; padding: 16px;
+    display: grid; place-items: center; min-height: 420px; position: relative; }
+  .canvas-box canvas { max-width: 100%; max-height: 78vh; height: auto; box-shadow: 0 18px 50px rgba(40,5,10,.35); border-radius: 6px; transition: opacity .3s; }
+  .canvas-box.busy canvas { opacity: .5; }
+
+  /* ── прочее ── */
+  .toast { position: fixed; left: 50%; bottom: 100px; transform: translate(-50%, 160px); background: var(--text); color: var(--bg);
+    padding: 10px 18px; border-radius: 999px; font-weight: 700; transition: transform .4s var(--spring); z-index: 70; max-width: 92vw; }
+  .toast.show { transform: translate(-50%, 0); }
+  dialog { border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--text); max-width: 520px; width: 92vw; padding: 20px; box-shadow: var(--shadow-lg); }
+  dialog[open] { animation: dlgIn .35s var(--spring); }
+  @keyframes dlgIn { from { opacity: 0; transform: translateY(16px) scale(.97); } }
+  dialog::backdrop { background: rgba(20,5,8,.45); backdrop-filter: blur(2px); }
+  dialog input { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); margin: 6px 0 12px; }
+  dialog h2 { font-size: 24px; }
+  .doclink { display: block; margin-top: 8px; font-weight: 700; color: var(--accent); word-break: break-all; }
+  dialog.wide { max-width: 780px; }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
   .form-grid label, .per-n { font-size: 12.5px; color: var(--muted); }
   .form-grid .full { grid-column: 1 / -1; }
@@ -80,169 +311,140 @@
   .dlg-foot { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
   .dlg-foot .grow, .prod-tools .search { flex: 1; }
   .btn.danger { color: #c0392b; }
-  .x { border: none; background: transparent; color: var(--muted); font-size: 16px; cursor: pointer; width: 30px; height: 30px; border-radius: 8px; }
-  .x:hover { background: var(--accent-soft); color: var(--accent); }
   .prod-tools { display: flex; gap: 8px; align-items: center; }
-  .prod-tools .search { margin: 0; }
+  .prod-tools .search { margin: 0; width: auto; }
   .prod-list { max-height: 60vh; overflow: auto; margin-top: 8px; }
-  .prod-list .sec-row td { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding-top: 12px; }
+  .prod-list .sec-row td { font-size: 11.5px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding-top: 12px; }
   .prod-list .pr { width: 100px; text-align: right; }
   .row-save { border: none; background: var(--accent); color: #fff; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-weight: 700; white-space: nowrap; }
   .row-save[hidden] { display: none; }
-  .chosen { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--text); border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 13px; }
-  .chip button { border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; width: 22px; height: 22px; border-radius: 50%; }
-  .chip button:hover { color: var(--accent); }
-  .empty { color: var(--muted); font-size: 13.5px; padding: 6px 0; }
-  .totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
-  .tot { background: var(--card); padding: 10px 12px; }
-  .tot span { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-  .tot b { font-size: 18px; font-variant-numeric: tabular-nums; }
-  .tot.main { background: var(--accent-soft); }
-  .tot.main b { color: var(--accent); font-size: 22px; }
-  .sec h2 .stot { font-variant-numeric: tabular-nums; }
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-  td { padding: 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  td.chk { width: 28px; } td.chk input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
-  .pn { font-weight: 600; }
-  .uses { font-size: 12px; color: var(--muted); }
-  .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .qin, .pin { width: 82px; text-align: right; padding: 5px 7px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); outline: none; }
-  .qin:focus, .pin:focus { border-color: var(--accent); background: var(--card); }
-  .qin.edited, .pin.edited { border-color: var(--accent); background: var(--accent-soft); }
-  .unit { color: var(--muted); font-size: 13px; padding-left: 4px; }
-  .src { display: block; font-size: 10.5px; color: var(--muted); text-align: right; }
-  .src.old { color: var(--warn); font-weight: 700; }
-  .reset { border: none; background: transparent; color: var(--accent); cursor: pointer; font-size: 13px; padding: 0 2px; }
-  tr.off td { color: var(--off); } tr.off .pn { text-decoration: line-through; } tr.off input.qin, tr.off input.pin { opacity: .5; }
-  .addrow { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-  .addrow select, .addrow input { padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); min-width: 0; }
-  .addrow select { flex: 1 1 200px; }
-  .btn { border: none; border-radius: 10px; padding: 10px 16px; font-weight: 700; cursor: pointer; background: var(--accent); color: #fff; }
-  .btn.small { padding: 6px 12px; font-size: 13px; }
-  .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
-  .btn:disabled { opacity: .6; cursor: wait; }
-  .actions { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-    background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(6px); padding: 10px 0; margin-top: 12px; }
-  .actions .grow { flex: 1; }
-  .hint { font-size: 12.5px; color: var(--muted); }
-  .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 90px); background: var(--text); color: var(--bg);
-    padding: 10px 18px; border-radius: 999px; font-weight: 600; transition: transform .25s; z-index: 20; max-width: 92vw; }
-  .toast.show { transform: translate(-50%, 0); }
-  dialog { border: 1px solid var(--line); border-radius: 16px; background: var(--card); color: var(--text); max-width: 520px; width: 92vw; padding: 20px; }
-  dialog::backdrop { background: rgba(0,0,0,.35); }
-  dialog input { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); margin: 6px 0 12px; }
-  .doclink { display: block; margin-top: 8px; font-weight: 700; color: var(--accent); word-break: break-all; }
-  /* вкладки: раскладка по блюдам → список продуктов */
-  .tabs { display: flex; gap: 4px; background: var(--soft); border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-bottom: 16px; }
-  .tab { flex: 1; border: none; background: transparent; border-radius: 9px; padding: 9px 12px; font-weight: 700; cursor: pointer; color: var(--muted); }
-  .tab small { font-weight: 500; display: block; font-size: 12px; }
-  .tab.on { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
-  .tab.on small { color: var(--accent); }
-  .dcard h2 { flex-wrap: wrap; align-items: center; }
-  .dcard h2 .dn { font-size: 17px; }
-  .dcard h2 .dmeta { color: var(--muted); font-weight: 500; font-size: 12.5px; flex: 1; }
-  .dcard h2 .dcost { font-variant-numeric: tabular-nums; }
-  .dcard .dnote { font-size: 12.5px; color: var(--muted); margin: -6px 0 8px; }
-  .dcard .gram { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
-  .dcard tr.removed td { color: var(--off); }
-  .dcard tr.removed .pn { text-decoration: line-through; font-weight: 400; }
-  .dcard tr.added .pn::after { content: " · добавлено"; color: var(--accent); font-weight: 500; font-size: 11.5px; }
-  .dadd { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
-  .dadd input { padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); min-width: 0; outline: none; }
-  .dadd input:focus { border-color: var(--accent); }
-  .dadd .an { flex: 1 1 200px; }
-  .dadd .aq { width: 90px; text-align: right; }
-  .dcard .x { width: 28px; height: 28px; }
-  .layout-foot { display: flex; justify-content: flex-end; margin-top: 12px; }
   @media (max-width: 560px) {
-    .tab { padding: 8px 6px; font-size: 14px; }
-    #eventName { width: 150px; }
-    .hide-sm { display: none; }
-    .qin, .pin { width: 64px; }
-    td, th { padding: 5px 3px; }
+    .hide-sm { display: none; } .qin, .pin { width: 64px; } td, th { padding: 5px 3px; }
+    .grid-d { grid-template-columns: repeat(2, 1fr); gap: 10px; } .dc .pic .em { font-size: 40px; }
+    .tiles { grid-template-columns: repeat(2, 1fr); } .tray-in { flex-wrap: wrap; } .tray .chips { flex-basis: 100%; order: -1; }
+    .search, .search:focus { width: 100%; }
   }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
   @media print {
-    header .icon-btn, .actions, .addrow, td.chk, .search, .cats, aside, .tabs, .dadd, .layout-foot, .dcard .x, .dcard .edit { display: none !important; }
-    .grid { grid-template-columns: 1fr; }
-    tr.off { display: none; }
-    .card { box-shadow: none; }
+    .top, .tray, .foot, .addrow, td.chk, .dadd, .dcard .x, .dcard .edit, #pane1, #pane4 { display: none !important; }
+    .pane[hidden] { display: none !important; } .card { box-shadow: none; } tr.off { display: none; }
     input.qin, input.pin { border: none; background: none; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>🪷 Воскресный пир</h1>
-    <div class="meta">
-      <div class="field"><label for="eventName">Событие</label><input id="eventName" placeholder="Воскресный пир 26.10"></div>
+<header class="top">
+  <div class="top-in">
+    <div class="bar">
+      <div class="brand"><span>🪷</span><b>Воскресный пир</b></div>
+      <div class="field"><label for="eventName">Событие</label><input id="eventName" placeholder="Воскресный пир" autocomplete="off"></div>
+      <div class="field"><label for="eventDate">Дата</label><input id="eventDate" type="date"></div>
       <div class="field">
         <label for="guests">Гостей</label>
-        <button class="step" id="minus" aria-label="Меньше гостей">−</button>
-        <input id="guests" type="number" min="1" max="2000" inputmode="numeric">
-        <button class="step" id="plus" aria-label="Больше гостей">+</button>
+        <button class="stepbtn" id="minus" aria-label="Меньше гостей">−</button>
+        <input id="guests" type="number" min="1" max="3000" inputmode="numeric">
+        <button class="stepbtn" id="plus" aria-label="Больше гостей">+</button>
       </div>
+      <button class="season" id="seasonBtn" title="Цены продуктов на сезон по дате пира. Нажмите, чтобы выбрать сезон вручную"></button>
       <button class="icon-btn" id="settingsBtn" title="Настройки" aria-label="Настройки">⚙</button>
     </div>
-  </header>
-
-  <div class="grid">
-    <aside>
-      <section class="card">
-        <h2>Блюда <small id="dishCount"></small></h2>
-        <div class="chosen" id="chosen"></div>
-      </section>
-      <section class="card">
-        <h2>Справочник блюд <small id="refCount"></small></h2>
-        <div class="ref-actions">
-          <button class="btn small" id="newDishBtn">+ Новое блюдо</button>
-          <button class="btn ghost small" id="productsBtn">Продукты и цены</button>
-        </div>
-        <input class="search" id="search" type="search" placeholder="Найти блюдо или продукт…" aria-label="Поиск блюда">
-        <div class="cats" id="cats"></div>
-        <div class="dlist" id="dlist"></div>
-      </section>
-    </aside>
-
-    <main>
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" data-tab="layout" id="tabLayout">1. Раскладка по блюдам <small id="tabLayoutN"></small></button>
-        <button class="tab" role="tab" data-tab="list" id="tabList">2. Список продуктов <small id="tabListN"></small></button>
-      </div>
-
-      <div id="paneLayout">
-        <p class="hint" style="margin-top:0">Состав каждого блюда на <b id="layoutGuests"></b>. Количество можно исправить,
-          продукт — убрать ✕ или добавить. Эти правки только для этого мероприятия; ✎ меняет блюдо в справочнике для всех.</p>
-        <div id="layout"></div>
-        <div class="layout-foot"><button class="btn" data-tab="list">Дальше: список продуктов →</button></div>
-      </div>
-
-      <div id="paneList">
-      <div class="totals" id="totals"></div>
-      <p class="hint" id="groupHint" hidden></p>
-      <div id="sections"></div>
-      <div class="actions">
-        <button class="btn" id="sheetsBtn">📊 Открыть в Google Таблицах</button>
-        <button class="btn ghost" id="docsBtn">Скачать Excel</button>
-        <button class="btn ghost" id="copyTextBtn">Текстом (WhatsApp)</button>
-        <span class="grow"></span>
-        <button class="btn ghost small" id="printBtn">Печать</button>
-        <button class="btn ghost small" id="resetBtn">Сбросить</button>
-      </div>
-      <p class="hint">Количество посчитано на число гостей по раскладке прошлых мероприятий (майский ретрит и меню 2023–2026).
-        Любую цифру можно исправить — исправленные поля подсвечены, ↺ возвращает расчёт. Цены «май 2026» — с майского ретрита;
-        цены с пометкой <b style="color:var(--warn)">среднее</b> — средние по старым закупам, их стоит уточнить.</p>
-      </div>
-    </main>
+    <nav class="steps" id="steps" aria-label="Шаги">
+      <button class="stp" data-step="1"><i>1</i><span class="lbl">Меню<small id="s1n">выберите блюда</small></span></button>
+      <button class="stp" data-step="2"><i>2</i><span class="lbl">Ингредиенты<small id="s2n">состав блюд</small></span></button>
+      <button class="stp" data-step="3"><i>3</i><span class="lbl">Закуп<small id="s3n">список продуктов</small></span></button>
+      <button class="stp" data-step="4"><i>4</i><span class="lbl">Афиша<small>для WhatsApp и печати</small></span></button>
+      <span class="progress" id="progress"></span>
+    </nav>
   </div>
+</header>
+
+<div class="wrap">
+  <!-- 1. Меню -->
+  <section class="pane" id="pane1">
+    <div class="ph-row">
+      <h1 class="ph" id="menuTitle">Что готовим?</h1>
+      <span class="grow"></span>
+      <input class="search" id="search" type="search" placeholder="Найти блюдо или продукт…" aria-label="Поиск блюда">
+      <button class="btn ghost small" id="newDishBtn">+ Новое блюдо</button>
+      <button class="btn ghost small" id="productsBtn">Продукты и цены</button>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="catview" id="catview" hidden>
+      <div class="cv-head">
+        <button class="btn ghost small" id="cvBack">← Все разделы</button>
+        <h2 id="cvTitle"></h2><span class="hint" id="cvHint"></span>
+        <span class="grow"></span>
+      </div>
+      <div class="grid-d" id="dgrid"></div>
+    </div>
+  </section>
+
+  <!-- 2. Ингредиенты -->
+  <section class="pane" id="pane2" hidden>
+    <div class="ph-row"><h1 class="ph">Ингредиенты</h1><span class="grow"></span><span class="hint" id="layoutHint"></span></div>
+    <p class="hint" style="margin-top:-6px">Состав каждого блюда на <b id="layoutGuests"></b>. Количество можно исправить,
+      продукт — убрать ✕ или добавить. Эти правки — только для этого пира; ✎ меняет блюдо в справочнике для всех.</p>
+    <div id="layout"></div>
+    <div class="foot">
+      <button class="btn ghost" data-go="1">← Меню</button><span class="grow"></span>
+      <button class="btn big" data-go="3">Подтвердить ингредиенты → список продуктов</button>
+    </div>
+  </section>
+
+  <!-- 3. Закуп -->
+  <section class="pane" id="pane3" hidden>
+    <div class="ph-row"><h1 class="ph">Список продуктов</h1><span class="grow"></span><span class="hint" id="seasonHint"></span></div>
+    <div class="totals" id="totals"></div>
+    <p class="hint" id="groupHint" hidden></p>
+    <div id="sections"></div>
+    <div class="foot">
+      <button class="btn ghost" data-go="2">← Ингредиенты</button>
+      <button class="btn" id="sheetsBtn">📊 Google Таблица</button>
+      <button class="btn ghost" id="docsBtn">Скачать Excel</button>
+      <button class="btn ghost" id="copyTextBtn">Текстом (WhatsApp)</button>
+      <span class="grow"></span>
+      <button class="btn ghost small" id="printBtn">Печать</button>
+      <button class="btn ghost small" id="resetBtn">Сбросить</button>
+      <button class="btn gold" data-go="4">Афиша →</button>
+    </div>
+    <p class="hint">Количество посчитано на число гостей по раскладке прошлых пиров (2011–2026). Цены — 2026 года на сезон пира
+      (<b>зима–весна</b>: декабрь–май, <b>лето</b>: июнь–август, <b>осень</b>: сентябрь–ноябрь): по закупам этого сезона,
+      а где их нет — пересчёт по сезонному коэффициенту. Любую цифру можно исправить — ↺ возвращает расчёт.</p>
+  </section>
+
+  <!-- 4. Афиша -->
+  <section class="pane" id="pane4" hidden>
+    <div class="ph-row"><h1 class="ph">Афиша пира</h1><span class="grow"></span><a class="btn ghost small" href="poster-guide.html" target="_blank">Гайд по стилю ↗</a></div>
+    <div class="poster-grid">
+      <div class="card pctl">
+        <label>Формат</label>
+        <div class="fmts" id="fmts"></div>
+        <label for="pTitle">Заголовок</label><input id="pTitle" placeholder="Воскресный пир">
+        <label for="pSub">Подзаголовок (дата, место, время)</label><input id="pSub" placeholder="Воскресенье, 23 ноября · 13:00">
+        <label for="pFoot">Нижняя строка</label><input id="pFoot" placeholder="Вход свободный">
+        <label>Описания блюд <span class="hint" style="text-transform:none;letter-spacing:0">— из реального состава, можно поправить</span></label>
+        <div class="pdesc" id="pdesc"></div>
+        <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap">
+          <button class="btn" id="pDownload">⬇ Скачать PNG</button>
+          <button class="btn ghost" id="pShare">Поделиться</button>
+        </div>
+        <p class="hint" id="pInfo"></p>
+      </div>
+      <div class="canvas-box" id="canvasBox"><canvas id="poster" width="1080" height="1350"></canvas></div>
+    </div>
+    <div class="foot"><button class="btn ghost" data-go="3">← Закуп</button></div>
+  </section>
 </div>
+
+<div class="tray" id="tray"><div class="tray-in">
+  <div class="chips" id="chips"></div>
+  <div class="sum" id="traySum"></div>
+  <button class="btn big" id="confirmMenu" data-go="2">Подтвердить меню →</button>
+</div></div>
 
 <dialog id="settings">
   <h2 style="margin-top:0">Настройки</h2>
-  <label class="hint" for="webappUrl">Адрес скрипта Google Docs (веб-приложение Apps Script, …/exec)</label>
+  <label class="hint" for="webappUrl">Адрес скрипта Google (веб-приложение Apps Script, …/exec)</label>
   <input id="webappUrl" placeholder="https://script.google.com/macros/s/…/exec">
   <label class="hint" for="cookName">Повар (будет в документе)</label>
   <input id="cookName" placeholder="Имя повара">
@@ -261,8 +463,8 @@
 <dialog id="dishEd" class="wide">
   <h2 style="margin-top:0" id="dishEdTitle">Новое блюдо</h2>
   <div class="form-grid">
-    <label>Название<input id="edName" placeholder="Например: Паниp тикка" autocomplete="off"></label>
-    <label>Категория<input id="edCat" list="catList" placeholder="Сабджи и вторые блюда" autocomplete="off"></label>
+    <label>Название<input id="edName" placeholder="Например: Панир тикка" autocomplete="off"></label>
+    <label>Раздел<input id="edCat" list="catList" placeholder="Сабджи и вторые блюда" autocomplete="off"></label>
     <label class="full">Заметка (необязательно)<input id="edNote" placeholder="Коротко о блюде" autocomplete="off"></label>
   </div>
   <div class="tags-row">
@@ -306,13 +508,15 @@
 <script src="data/config.js"></script>
 <script src="data/catalog.js"></script>
 <script src="data/dishes.js"></script>
+<script src="data/img/index.js"></script>
 <script>
 (function () {
   const CFG = window.CONFIG || {};
   const $ = (id) => document.getElementById(id);
-  // Встроенный справочник (из файла ретрита) + то, что добавили/изменили на сайте (общее, хранится в скрипте Google)
+  // Встроенный справочник + то, что добавили/изменили на сайте (общее, хранится в скрипте Google)
   const BASE_CAT = window.CATALOG || {};
   const BASE_DISHES = window.DISHES || [];
+  const HAS_IMG = new Set(window.DISH_IMAGES || []);
   const REMOTE_KEY = "sunday-feast-remote";
   let REMOTE = { dishes: [], products: {} };
   try { REMOTE = JSON.parse(localStorage.getItem(REMOTE_KEY)) || REMOTE; } catch (e) {}
@@ -320,18 +524,17 @@
   function rebuild() {
     CAT = Object.assign({}, BASE_CAT);
     for (const [k, p] of Object.entries(REMOTE.products || {})) {
-      if (p.deleted) delete CAT[k]; else CAT[k] = Object.assign({}, BASE_CAT[k] || {}, p);
+      if (p.deleted) delete CAT[k]; else CAT[k] = Object.assign({}, BASE_CAT[k] || {}, p, { siteEdited: true });
     }
     const m = new Map(BASE_DISHES.map(d => [d.id, d]));
     for (const d of REMOTE.dishes || []) {
       if (d.deleted) m.delete(d.id); else m.set(d.id, Object.assign({}, m.get(d.id) || {}, d));
     }
-    DISHES = [...m.values()].sort((a, b) => (a.category || "").localeCompare(b.category || "", "ru") || a.name.localeCompare(b.name, "ru"));
+    DISHES = [...m.values()].sort((a, b) => a.name.localeCompare(b.name, "ru"));
     byId = Object.fromEntries(DISHES.map(d => [d.id, d]));
   }
   rebuild();
   const KEY = "sunday-feast-v2";
-  // Разделы на сайте → вкладки Google Docs
   const SECTIONS = [
     { name: "Молочка", tab: "Молочка", icon: "🥛" },
     { name: "Бакалея", tab: "Бакалея", icon: "🌾" },
@@ -340,10 +543,29 @@
     { name: "Остальное", tab: "Остальное", icon: "📦" },
     { name: "Хоз. часть", tab: "Остальное", icon: "🧽" },
   ];
+  // Цветные блоки меню: раздел справочника → блок
+  const TILES = [
+    { id: "sabji", name: "Сабджи", em: "🍛", c: "#d9782d", cats: ["Сабджи и вторые блюда"] },
+    { id: "soup", name: "Супы и далы", em: "🍲", c: "#c49a1c", cats: ["Супы и далы"] },
+    { id: "snack", name: "Закуски", em: "🥟", c: "#c8492f", cats: ["Закуски"] },
+    { id: "sweet", name: "Сладкое", em: "🍮", c: "#c9507a", cats: ["Сладости"] },
+    { id: "drink", name: "Напитки", em: "🥤", c: "#2e8fae", cats: ["Напитки"] },
+    { id: "salad", name: "Салаты", em: "🥗", c: "#4f9a46", cats: ["Салаты и нарезки"] },
+    { id: "bread", name: "Выпечка и хлеб", em: "🫓", c: "#a8743e", cats: ["Хлеб и выпечка"] },
+    { id: "sauce", name: "Соусы и чатни", em: "🫙", c: "#9c3b2b", cats: ["Соусы и подливки"] },
+    { id: "kasha", name: "Каши", em: "🥣", c: "#b8883b", cats: ["Каши"] },
+    { id: "fruit", name: "Фрукты и другое", em: "🍎", c: "#6e9532", cats: ["Фрукты", "Другое"] },
+  ];
+  const tileOf = (d) => TILES.find(t => t.cats.includes(d.category)) || TILES[TILES.length - 1];
+  const SEASONS = { winter: { name: "Зима–весна", em: "❄️", months: "дек–май" }, summer: { name: "Лето", em: "☀️", months: "июн–авг" },
+                    autumn: { name: "Осень", em: "🍂", months: "сен–ноя" } };
+  const seasonOfDate = (iso) => { const m = iso ? +iso.slice(5, 7) : new Date().getMonth() + 1; return m >= 6 && m <= 8 ? "summer" : m >= 9 && m <= 11 ? "autumn" : "winter"; };
+  const nextSunday = () => { const d = new Date(); d.setDate(d.getDate() + ((7 - d.getDay()) % 7)); return d.toISOString().slice(0, 10); };
 
   // ── состояние ──
   // dishEdits: правки состава блюд на это мероприятие — { idБлюда: { ключПродукта: количество на гостя (0 — убран) } }
-  const fresh = () => ({ event: "", guests: CFG.DEFAULT_GUESTS || 50, dishes: [], edits: {}, dishEdits: {}, extra: [], extraKeys: [], webapp: "", cook: "", tab: "layout" });
+  const fresh = () => ({ event: "", date: nextSunday(), seasonManual: "", guests: CFG.DEFAULT_GUESTS || 50, dishes: [], edits: {}, dishEdits: {},
+                         extra: [], extraKeys: [], webapp: "", cook: "", step: 1, cat: "", poster: { fmt: "post", title: "", sub: "", foot: "", desc: {} } });
   let S = fresh();
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
   if (location.hash.length > 1) {
@@ -351,13 +573,31 @@
     if (h.get("d")) S.dishes = h.get("d").split(",").filter(id => byId[id]);
     if (h.get("g")) S.guests = Math.max(1, +h.get("g") || S.guests);
     if (h.get("e")) S.event = h.get("e");
+    if (h.get("t")) S.date = h.get("t");
   }
   S.dishes = S.dishes.filter(id => byId[id]);
-  S.dishEdits ||= {};
+  S.dishEdits ||= {}; S.date ||= nextSunday(); S.poster = Object.assign(fresh().poster, S.poster || {}); S.poster.desc ||= {};
+  if (![1, 2, 3, 4].includes(S.step)) S.step = 1;
+  const season = () => S.seasonManual || seasonOfDate(S.date);
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const money = (n) => Math.round(n || 0).toLocaleString("ru-RU") + " ₸";
-  const toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2200); };
+  const toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2400); };
+  const thumb = (id) => HAS_IMG.has(id) ? `data/img/${id}-s.webp` : "";
+  const plural = (n, a, b, c) => { const n10 = n % 10, n100 = n % 100; return n10 === 1 && n100 !== 11 ? a : n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14) ? b : c; };
+
+  // ── цены по сезону ──
+  // Цена из справочника: на сезон пира; если цену поменяли на сайте («Продукты и цены») — она на все сезоны
+  function catPrice(k) {
+    const c = CAT[k] || {};
+    if (c.siteEdited || !c.season) return c.price || 0;
+    return c.season[season()] ?? c.price ?? 0;
+  }
+  function catPriceSrc(k) {
+    const c = CAT[k] || {};
+    if (c.siteEdited || !c.season) return c.price_src || "";
+    return (c.season_src || {})[season()] || c.price_src || "";
+  }
 
   // ── расчёт количества ──
   function roundQty(q, unit) {
@@ -366,11 +606,9 @@
     return q < 1 ? Math.max(0.05, Math.ceil(q * 20) / 20) : Math.round(q * 10) / 10;  // кг/л: до 50 г, затем до 100 г
   }
   const fmtQty = (q) => (Math.round(q * 100) / 100).toLocaleString("ru-RU");
-  // На маленьких мероприятиях на человека уходит больше: по меню 2023–2026 до 100 гостей — примерно +30%,
-  // 100–250 — около +8%, от 250 — как в раскладке. Поправка только на блюда (не на посуду и базовые специи).
+  // На маленьких мероприятиях на человека уходит больше: до 100 гостей — примерно +30%, 100–250 — около +8%, от 250 — как в раскладке.
   const groupK = (g) => Math.min(1.3, Math.max(1, Math.pow(250 / Math.max(1, g), 0.15)));
 
-  // Состав блюда для этого мероприятия: справочник + правки из раскладки. { ключ: количество на гостя }
   function baseIngr(d) {
     const out = {};
     for (const src of [d.products || {}, d.spices || {}])
@@ -383,7 +621,10 @@
     for (const k of Object.keys(out)) if (!CAT[k]) delete out[k];
     return out;
   }
-  const priceOf = (k) => { const e = S.edits[k]; return e && e.price != null ? e.price : (CAT[k]?.price || 0); };
+  const priceOf = (k) => { const e = S.edits[k]; return e && e.price != null ? e.price : catPrice(k); };
+  const dishCostPerGuest = (d) => Object.entries(d.products || {}).reduce((s, [k, q]) => s + q * catPrice(k), 0);
+  const compText = (d, n = 5) => Object.entries(d.products || {}).sort((a, b) => b[1] - a[1]).map(([k]) => CAT[k]?.name).filter(Boolean)
+    .map(s => s.replace(/\s*\(.*?\)|\s*\d+[,.]?\d*%/g, "")).filter((s, i, a) => a.indexOf(s) === i).slice(0, n).join(", ");
 
   function computeRows() {
     const rows = {};
@@ -397,8 +638,7 @@
       const d = byId[id];
       for (const [p, q] of Object.entries(dishIngr(d))) add(p, q * g * boost, d.name);
     }
-    // специи: базовый набор по норме ретрита (упаковок на 100 гостей за приём пищи);
-    // пачками — минимум 1 упаковка, весовые (барбарис, паприка) — по расчёту
+    // специи: базовый набор по норме ретрита (упаковок на 100 гостей); пачками — минимум 1 упаковка
     for (const [k, c] of Object.entries(CAT)) {
       if (c.section === "Специи" && (c.default || rows[k])) {
         const base = (c.per100 || 0) * g / 100;
@@ -412,18 +652,16 @@
       const e = S.edits[r.key] || {};
       const calc = roundQty(r.q, c.unit);
       const qty = e.qty != null ? e.qty : calc;
-      const price = e.price != null ? e.price : (c.price || 0);
-      return { ...r, ...c, calc, qty, price, sum: qty * price, off: !!e.off, qtyEdited: e.qty != null, priceEdited: e.price != null };
+      const price = e.price != null ? e.price : catPrice(r.key);
+      return { ...r, ...c, price_src: catPriceSrc(r.key), calc, qty, price, sum: qty * price, off: !!e.off, qtyEdited: e.qty != null, priceEdited: e.price != null };
     });
-    // позиции, добавленные из справочника вручную
     for (const k of S.extraKeys || []) {
       if (list.some(r => r.key === k) || !CAT[k]) continue;
       const c = CAT[k], e = S.edits[k] || {};
-      const qty = e.qty != null ? e.qty : 1, price = e.price != null ? e.price : (c.price || 0);
-      list.push({ key: k, ...c, uses: ["добавлено вручную"], calc: 1, qty, price, sum: qty * price, off: !!e.off,
+      const qty = e.qty != null ? e.qty : 1, price = e.price != null ? e.price : catPrice(k);
+      list.push({ key: k, ...c, price_src: catPriceSrc(k), uses: ["добавлено вручную"], calc: 1, qty, price, sum: qty * price, off: !!e.off,
                   qtyEdited: false, priceEdited: e.price != null });
     }
-    // свои позиции (не из справочника)
     for (const x of S.extra) {
       const e = S.edits[x.id] || {};
       list.push({ key: x.id, name: x.name, unit: x.unit, section: x.section, calc: x.qty, qty: e.qty != null ? e.qty : x.qty,
@@ -434,37 +672,103 @@
     return list;
   }
 
-  // ── отрисовка: блюда ──
-  let catFilter = "Все";
-  function renderDishes() {
-    $("refCount").textContent = DISHES.length + " блюд";
-    const cats = ["Все", ...new Set(DISHES.map(d => d.category))];
-    $("cats").innerHTML = cats.map(c => `<button class="cat ${c === catFilter ? "on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+  // ── шаг 1: цветные блоки и блюда ──
+  function picHtml(d, t) {
+    const src = thumb(d.id);
+    return `<div class="pic"><span class="em">${t.em}</span>${src ? `<img loading="lazy" src="${src}" alt="" onload="this.classList.add('ld')" onerror="this.remove()">` : ""}</div>`;
+  }
+  function renderTiles() {
+    const q = $("search").value.trim();
+    const counts = Object.fromEntries(TILES.map(t => [t.id, DISHES.filter(d => tileOf(d) === t).length]));
+    const sel = Object.fromEntries(TILES.map(t => [t.id, S.dishes.filter(id => tileOf(byId[id]) === t).length]));
+    const tilesEl = $("tiles");
+    tilesEl.classList.toggle("compact", !!(S.cat || q));
+    tilesEl.innerHTML = TILES.filter(t => counts[t.id]).map(t => `
+      <button class="tile ${S.cat === t.id ? "on" : ""}" data-tile="${t.id}" style="--c:${t.c}">
+        <span class="em">${t.em}</span>
+        <span><b>${esc(t.name)}</b><div class="cnt">${counts[t.id]} ${plural(counts[t.id], "блюдо", "блюда", "блюд")}</div></span>
+        <span class="sel ${sel[t.id] ? "show" : ""}">${sel[t.id] || ""}</span>
+      </button>`).join("");
+  }
+  function renderDishGrid() {
     const q = $("search").value.trim().toLowerCase();
-    const match = (d) => (catFilter === "Все" || d.category === catFilter) &&
-      (!q || d.name.toLowerCase().includes(q) || Object.keys(d.products).some(k => (CAT[k]?.name || "").toLowerCase().includes(q)));
-    const groups = {};
-    DISHES.filter(match).forEach(d => (groups[d.category] ||= []).push(d));
-    $("dlist").innerHTML = Object.keys(groups).length ? Object.entries(groups).map(([cat, ds]) => `
-      <div class="dgroup">${esc(cat)}</div>
-      ${ds.map(d => {
-        const on = S.dishes.includes(d.id);
-        const comp = Object.keys(d.products).map(k => CAT[k]?.name).filter(Boolean).slice(0, 6).join(", ");
-        return `<div class="dish-row"><label class="dish ${on ? "on" : ""}" title="${esc(d.source || "")}">
-          <input type="checkbox" data-dish="${d.id}" ${on ? "checked" : ""}>
-          <span><span class="nm">${esc(d.name)}</span>${(d.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join("")}${d.custom ? `<span class="tag mine">${BASE_DISHES.some(b => b.id === d.id) ? "изменено" : "своё"}</span>` : ""}
-            <div class="sub">${esc(comp)}${Object.keys(d.products).length > 6 ? "…" : ""}</div></span>
-        </label><button class="edit" data-edit="${d.id}" title="Изменить блюдо" aria-label="Изменить ${esc(d.name)}">✎</button></div>`;
-      }).join("")}`).join("") : `<div class="empty">Ничего не найдено</div>`;
-    $("chosen").innerHTML = S.dishes.length
-      ? S.dishes.map(id => `<span class="chip">${esc(byId[id].name)}<button data-undish="${id}" aria-label="Убрать ${esc(byId[id].name)}">✕</button></span>`).join("")
-      : `<div class="empty">Отметьте блюда в справочнике ниже — список закупа соберётся сам.</div>`;
-    $("dishCount").textContent = S.dishes.length ? S.dishes.length + " выбрано" : "";
+    const t = TILES.find(x => x.id === S.cat);
+    $("catview").hidden = !(t || q);
+    if (!(t || q)) return;
+    const list = DISHES.filter(d => q ? (d.name.toLowerCase().includes(q) || Object.keys(d.products || {}).some(k => (CAT[k]?.name || "").toLowerCase().includes(q)))
+                                      : tileOf(d) === t);
+    $("cvTitle").textContent = q ? `Поиск: «${$("search").value.trim()}»` : `${t.em} ${t.name}`;
+    $("cvHint").textContent = `${list.length} ${plural(list.length, "блюдо", "блюда", "блюд")} · нажмите, чтобы добавить в меню`;
+    $("dgrid").innerHTML = list.length ? list.map((d, i) => {
+      const tt = tileOf(d), on = S.dishes.includes(d.id);
+      const mine = d.custom ? `<span class="tag mine">${BASE_DISHES.some(b => b.id === d.id) ? "изменено" : "своё"}</span>` : "";
+      return `<div class="dc ${on ? "on" : ""}" data-pick="${d.id}" style="--c:${tt.c};--i:${Math.min(i, 24)}" role="button" tabindex="0"
+          aria-pressed="${on}" title="${esc(d.source || "")}">
+        ${picHtml(d, tt)}
+        <span class="add">${on ? "✓" : "+"}</span>
+        <button class="ed" data-edit="${d.id}" title="Изменить блюдо в справочнике" aria-label="Изменить ${esc(d.name)}">✎</button>
+        <div class="body"><div class="nm">${esc(d.name)} ${mine}</div>
+          <div class="cp">${esc(compText(d))}</div>
+          <div class="meta">${(d.tags || []).map(x => `<span class="tag">${esc(x)}</span>`).join("")}<span style="margin-left:auto">≈ <b>${money(dishCostPerGuest(d))}</b> / гость</span></div></div>
+      </div>`;
+    }).join("") : `<div class="empty big">Ничего не найдено. Можно добавить своё блюдо: «+ Новое блюдо».</div>`;
+  }
+  let lastTray = [];
+  function renderTray() {
+    const show = S.step === 1;
+    $("tray").classList.toggle("show", show && S.dishes.length > 0);
+    const chips = $("chips");
+    const ids = S.dishes;
+    // добавляем/убираем только изменившиеся чипы — чтобы анимация была только у нового
+    const have = new Map([...chips.children].map(el => [el.dataset.id, el]));
+    for (const [id, el] of have) if (!ids.includes(id)) el.remove();
+    ids.forEach((id, i) => {
+      if (have.has(id) && have.get(id).isConnected) return;
+      const d = byId[id], t = tileOf(d), src = thumb(id);
+      const el = document.createElement("span");
+      el.className = "chip"; el.dataset.id = id; el.style.setProperty("--c", t.c);
+      el.innerHTML = `<span class="th" style="${src ? `background-image:url('${src}')` : ""}">${src ? "" : t.em}</span>${esc(d.name)}<button data-undish="${id}" aria-label="Убрать ${esc(d.name)}">✕</button>`;
+      const before = chips.children[i];
+      chips.insertBefore(el, before || null);
+    });
+    const perGuest = S.dishes.reduce((s, id) => s + dishCostPerGuest(byId[id]) * groupK(S.guests), 0);
+    $("traySum").innerHTML = `${ids.length} ${plural(ids.length, "блюдо", "блюда", "блюд")} · на гостя ≈ ${money(perGuest)}<b>≈ ${money(perGuest * S.guests)}</b>`;
+    if (lastTray.length !== ids.length) { $("traySum").classList.remove("bump"); void $("traySum").offsetWidth; $("traySum").classList.add("bump"); }
+    lastTray = [...ids];
+  }
+  function flyToTray(fromEl, d) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const r = fromEl.getBoundingClientRect(), t = tileOf(d), src = thumb(d.id);
+    const target = $("chips").lastElementChild || $("chips");
+    const tr = target.getBoundingClientRect();
+    const f = document.createElement("div");
+    f.className = "fly"; f.style.setProperty("--c", t.c);
+    if (src) f.style.backgroundImage = `url('${src}')`; else f.textContent = t.em;
+    const size = 56;
+    Object.assign(f.style, { width: size + "px", height: size + "px", left: (r.left + r.width / 2 - size / 2) + "px", top: (r.top + r.height / 3 - size / 2) + "px" });
+    document.body.appendChild(f);
+    const dx = tr.left + 14 - (r.left + r.width / 2), dy = tr.top + 14 - (r.top + r.height / 3);
+    f.animate([{ transform: "translate(0,0) scale(1)", opacity: 1 },
+               { transform: `translate(${dx * .5}px, ${dy * .5 - 80}px) scale(.9)`, opacity: 1, offset: .55 },
+               { transform: `translate(${dx}px, ${dy}px) scale(.35)`, opacity: .2 }],
+              { duration: 650, easing: "cubic-bezier(.5,0,.2,1)" }).onfinish = () => f.remove();
+  }
+  function togglePick(id, el) {
+    const on = S.dishes.includes(id);
+    S.dishes = on ? S.dishes.filter(x => x !== id) : [...S.dishes, id];
+    save();
+    renderTiles(); renderTray(); updateSteps();
+    if (el) {
+      el.classList.toggle("on", !on); el.setAttribute("aria-pressed", !on);
+      el.querySelector(".add").textContent = on ? "+" : "✓";
+      if (!on) requestAnimationFrame(() => flyToTray(el, byId[id]));
+    }
   }
 
-  // ── отрисовка: список закупа ──
+  // ── шаг 3: строка списка закупа ──
   function rowHtml(r) {
     const old = r.price_src && /^(среднее|из 1 файла)/.test(r.price_src);
+    const seasonal = r.price_src && /^(закупы 2026|расчёт по сезону)/.test(r.price_src);
     const src = r.priceEdited ? "исправлено" : (r.price_src || "");
     return `<tr class="${r.off ? "off" : ""}">
       <td class="chk"><input type="checkbox" data-off="${r.key}" ${r.off ? "" : "checked"} aria-label="Покупать: ${esc(r.name)}"></td>
@@ -472,12 +776,12 @@
       <td class="num"><input class="qin ${r.qtyEdited ? "edited" : ""}" data-qty="${r.key}" value="${fmtQty(r.qty)}" inputmode="decimal" aria-label="Количество">
         <span class="unit">${esc(r.unit || "")}</span>${r.qtyEdited ? `<button class="reset" data-resetq="${r.key}" title="Вернуть расчёт: ${fmtQty(r.calc)}">↺</button>` : ""}</td>
       <td class="num hide-sm"><input class="pin ${r.priceEdited ? "edited" : ""}" data-price="${r.key}" value="${Math.round(r.price || 0)}" inputmode="decimal" aria-label="Цена за единицу">
-        <span class="src ${old && !r.priceEdited ? "old" : ""}">${esc(src)}${r.priceEdited ? ` <button class="reset" data-resetp="${r.key}" title="Вернуть цену">↺</button>` : ""}</span></td>
+        <span class="src ${old && !r.priceEdited ? "old" : seasonal && !r.priceEdited ? "season" : ""}">${esc(src)}${r.priceEdited ? ` <button class="reset" data-resetp="${r.key}" title="Вернуть цену">↺</button>` : ""}</span></td>
       <td class="num"><b>${money(r.sum)}</b></td>
     </tr>`;
   }
 
-  // ── отрисовка: раскладка по блюдам ──
+  // ── шаг 2: ингредиенты по блюдам ──
   const fmtTot = (q) => (q < 0.1 ? Math.round(q * 1000) / 1000 : Math.round(q * 100) / 100).toLocaleString("ru-RU");
   function perGuest(q, unit) {
     if (unit === "кг") return (Math.round(q * 1000 * 10) / 10).toLocaleString("ru-RU") + " г";
@@ -487,13 +791,14 @@
   const secOrder = (k) => { const i = SECTION_NAMES.indexOf(CAT[k]?.section); return i < 0 ? 99 : i; };
   function renderLayout() {
     const g = S.guests, mult = g * groupK(g);
-    $("layoutGuests").textContent = g + " " + (g % 10 === 1 && g % 100 !== 11 ? "гостя" : "гостей");
+    $("layoutGuests").textContent = g + " " + plural(g, "гостя", "гостей", "гостей");
     if (!S.dishes.length) {
-      $("layout").innerHTML = `<section class="card"><div class="empty">Отметьте блюда в справочнике слева — здесь появится раскладка каждого блюда.</div></section>`;
+      $("layout").innerHTML = `<section class="card"><div class="empty big">Сначала выберите блюда на шаге «Меню».</div></section>`;
       return;
     }
-    $("layout").innerHTML = S.dishes.map(id => {
-      const d = byId[id], base = baseIngr(d), ov = S.dishEdits[id] || {}, ing = dishIngr(d);
+    let total = 0;
+    $("layout").innerHTML = S.dishes.map((id, i) => {
+      const d = byId[id], t = tileOf(d), base = baseIngr(d), ov = S.dishEdits[id] || {}, ing = dishIngr(d);
       const keys = [...new Set([...Object.keys(base), ...Object.keys(ing)])].filter(k => CAT[k])
         .sort((a, b) => secOrder(a) - secOrder(b) || CAT[a].name.localeCompare(CAT[b].name, "ru"));
       let cost = 0;
@@ -514,10 +819,11 @@
             : `<button class="x" data-drm="${id}|${k}" title="Убрать из блюда" aria-label="Убрать ${esc(c.name)}">✕</button>`}</td>
         </tr>`;
       }).join("");
-      const changed = Object.keys(ov).length;
-      return `<section class="card dcard">
-        <h2><span class="dn">${esc(d.name)}</span>
-          <span class="dmeta">${esc(d.category || "")}${changed ? ` · <span style="color:var(--accent)">изменено для этого мероприятия</span>` : ""}</span>
+      total += cost;
+      const changed = Object.keys(ov).length, src = thumb(id);
+      return `<section class="card dcard" style="--c:${t.c};--i:${Math.min(i, 12)}">
+        <h2 class="ch"><span class="th" style="${src ? `background-image:url('${src}')` : ""}">${src ? "" : t.em}</span><span class="dn">${esc(d.name)}</span>
+          <span class="dmeta">${esc(d.category || "")}${changed ? ` · <span style="color:var(--accent)">изменено для этого пира</span>` : ""}</span>
           <span class="dcost">≈ ${money(cost)}</span>
           <button class="edit" data-edit="${id}" title="Изменить блюдо в справочнике (для всех)" aria-label="Изменить ${esc(d.name)} в справочнике">✎</button>
           <button class="x" data-undish="${id}" title="Убрать блюдо из меню" aria-label="Убрать ${esc(d.name)} из меню">✕</button></h2>
@@ -532,70 +838,156 @@
         </div>
       </section>`;
     }).join("");
+    $("layoutHint").textContent = `${S.dishes.length} ${plural(S.dishes.length, "блюдо", "блюда", "блюд")} · ≈ ${money(total)} без специй и хоз. части`;
+  }
+
+  // ── шаги ──
+  function updateSteps() {
+    const n = S.dishes.length;
+    $("s1n").textContent = n ? `${n} ${plural(n, "блюдо", "блюда", "блюд")}` : "выберите блюда";
+    document.querySelectorAll(".stp").forEach(b => {
+      const k = +b.dataset.step;
+      b.classList.toggle("on", k === S.step);
+      b.classList.toggle("done", k < S.step);
+      b.setAttribute("aria-current", k === S.step ? "step" : "false");
+    });
+    $("progress").style.width = ((S.step - 1) / 3 * 100 + 12.5) + "%";
+    $("confirmMenu").disabled = !n;
+  }
+  function go(step, opts = {}) {
+    if (step > 1 && !S.dishes.length) { toast("Сначала выберите блюда"); step = 1; }
+    const back = step < S.step;
+    S.step = step;
+    for (let i = 1; i <= 4; i++) {
+      const p = $("pane" + i);
+      p.hidden = i !== step;
+      if (i === step) { p.classList.toggle("back", back); p.style.animation = "none"; void p.offsetWidth; p.style.animation = ""; }
+    }
+    render();
+    if (!opts.keepScroll) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderSeason() {
+    const s = SEASONS[season()];
+    $("seasonBtn").innerHTML = `${s.em} ${s.name} <small>цены ${s.months}</small>`;
+    $("seasonBtn").classList.toggle("manual", !!S.seasonManual);
+    $("seasonBtn").title = S.seasonManual ? "Сезон выбран вручную. Нажмите, чтобы сменить (последний — снова по дате)"
+      : "Сезон по дате пира — цены этого сезона 2026 года. Нажмите, чтобы выбрать вручную";
+    $("seasonHint").textContent = `${s.em} цены сезона «${s.name}» 2026`;
   }
 
   function render() {
     $("guests").value = S.guests;
     $("eventName").value = S.event;
-    renderDishes();
-    if (S.tab !== "list") S.tab = "layout";
-    $("paneLayout").hidden = S.tab !== "layout";
-    $("paneList").hidden = S.tab !== "list";
-    $("tabLayout").classList.toggle("on", S.tab === "layout");
-    $("tabList").classList.toggle("on", S.tab === "list");
-    $("tabLayout").setAttribute("aria-selected", S.tab === "layout");
-    $("tabList").setAttribute("aria-selected", S.tab === "list");
+    $("eventDate").value = S.date;
+    renderSeason();
+    updateSteps();
     fillLists();
-    renderLayout();
+    renderTray();
+    if (S.step === 1) { renderTiles(); renderDishGrid(); }
+    if (S.step === 2) renderLayout();
     const rows = computeRows();
     let grand = 0;
     const totals = [];
-    $("sections").innerHTML = SECTIONS.map(sec => {
-      const rs = rows.filter(r => r.section === sec.name).sort((a, b) => b.sum - a.sum);
-      const tot = rs.filter(r => !r.off).reduce((s, r) => s + r.sum, 0);
-      grand += tot; totals.push([sec, tot]);
-      const options = Object.entries(CAT).filter(([k, c]) => c.section === sec.name && !rs.some(r => r.key === k))
-        .sort((a, b) => a[1].name.localeCompare(b[1].name, "ru"))
-        .map(([k, c]) => `<option value="${k}">${esc(c.name)}</option>`).join("");
-      return `<section class="card sec" id="sec-${sec.name}">
-        <h2>${sec.icon} ${esc(sec.name)} <small class="stot">${rs.filter(r => !r.off).length} поз. · <b>${money(tot)}</b></small></h2>
-        ${rs.length ? `<table><thead><tr><th></th><th>Наименование</th><th class="num">Кол-во</th><th class="num hide-sm">Цена за ед.</th><th class="num">Сумма</th></tr></thead>
-          <tbody>${rs.map(rowHtml).join("")}</tbody></table>` : `<div class="empty">Пока пусто</div>`}
-        <div class="addrow">
-          <select data-addsel="${esc(sec.name)}"><option value="">+ добавить из справочника…</option>${options}<option value="__custom">+ своя позиция…</option></select>
-        </div>
-      </section>`;
-    }).join("");
-    $("totals").innerHTML = totals.map(([s, t]) => `<div class="tot"><span>${s.icon} ${esc(s.name)}</span><b>${money(t)}</b></div>`).join("")
-      + `<div class="tot main"><span>Итого · на гостя ${money(grand / Math.max(1, S.guests))}</span><b>${money(grand)}</b></div>`;
-    const pct = Math.round((groupK(S.guests) - 1) * 100);
-    $("groupHint").hidden = !(pct > 0 && S.dishes.length);
-    $("groupHint").textContent = `Продукты на блюда посчитаны с запасом +${pct}%: на мероприятиях меньше 250 гостей на человека обычно уходит больше.`;
-    const n = S.dishes.length, n10 = n % 10, n100 = n % 100;
-    const word = n10 === 1 && n100 !== 11 ? "блюдо" : n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14) ? "блюда" : "блюд";
-    $("tabLayoutN").textContent = n ? `${n} ${word}` : "выберите блюда";
-    $("tabListN").textContent = rows.filter(r => !r.off && r.qty > 0).length + " поз. · " + money(grand);
+    if (S.step === 3) {
+      $("sections").innerHTML = SECTIONS.map(sec => {
+        const rs = rows.filter(r => r.section === sec.name).sort((a, b) => b.sum - a.sum);
+        const tot = rs.filter(r => !r.off).reduce((s, r) => s + r.sum, 0);
+        totals.push([sec, tot]);
+        const options = Object.entries(CAT).filter(([k, c]) => c.section === sec.name && !rs.some(r => r.key === k))
+          .sort((a, b) => a[1].name.localeCompare(b[1].name, "ru"))
+          .map(([k, c]) => `<option value="${k}">${esc(c.name)}</option>`).join("");
+        return `<section class="card sec" id="sec-${sec.name}">
+          <h2 class="ch">${sec.icon} ${esc(sec.name)} <small class="stot">${rs.filter(r => !r.off).length} поз. · <b>${money(tot)}</b></small></h2>
+          ${rs.length ? `<table><thead><tr><th></th><th>Наименование</th><th class="num">Кол-во</th><th class="num hide-sm">Цена за ед.</th><th class="num">Сумма</th></tr></thead>
+            <tbody>${rs.map(rowHtml).join("")}</tbody></table>` : `<div class="empty">Пока пусто</div>`}
+          <div class="addrow">
+            <select data-addsel="${esc(sec.name)}"><option value="">+ добавить из справочника…</option>${options}<option value="__custom">+ своя позиция…</option></select>
+          </div>
+        </section>`;
+      }).join("");
+    }
+    for (const sec of SECTIONS) grand += rows.filter(r => r.section === sec.name && !r.off).reduce((s, r) => s + r.sum, 0);
+    if (S.step === 3) {
+      $("totals").innerHTML = totals.map(([s, t]) => `<div class="tot"><span>${s.icon} ${esc(s.name)}</span><b data-count="${Math.round(t)}">${money(t)}</b></div>`).join("")
+        + `<div class="tot main"><span>Итого · на гостя ${money(grand / Math.max(1, S.guests))}</span><b data-count="${Math.round(grand)}">${money(grand)}</b></div>`;
+      countUp($("totals"));
+      const pct = Math.round((groupK(S.guests) - 1) * 100);
+      $("groupHint").hidden = !(pct > 0 && S.dishes.length);
+      $("groupHint").textContent = `Продукты на блюда посчитаны с запасом +${pct}%: на пирах меньше 250 гостей на человека обычно уходит больше.`;
+    }
+    $("s2n").textContent = S.dishes.length ? `на ${S.guests} ${plural(S.guests, "гостя", "гостей", "гостей")}` : "состав блюд";
+    $("s3n").textContent = rows.filter(r => !r.off && r.qty > 0).length + " поз. · " + money(grand);
+    if (S.step === 4) renderPosterControls();
     save();
+  }
+  // плавный счётчик сумм
+  const shown = {};
+  function countUp(root) {
+    root.querySelectorAll("[data-count]").forEach((el, i) => {
+      const key = i, to = +el.dataset.count, from = shown[key] ?? 0;
+      shown[key] = to;
+      if (from === to || matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = money(to); return; }
+      const t0 = performance.now(), dur = 600;
+      const tick = (t) => { const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = money(from + (to - from) * e); if (p < 1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    });
   }
 
   // ── события ──
-  const setGuests = (n) => { S.guests = Math.max(1, Math.min(2000, Math.round(n) || 1)); render(); };
+  const setGuests = (n) => { S.guests = Math.max(1, Math.min(3000, Math.round(n) || 1)); render(); };
   $("minus").onclick = () => setGuests(S.guests - (S.guests > 20 ? 5 : 1));
   $("plus").onclick = () => setGuests(S.guests + (S.guests >= 20 ? 5 : 1));
   $("guests").onchange = (e) => setGuests(+e.target.value);
   $("eventName").oninput = (e) => { S.event = e.target.value; save(); };
-  $("search").oninput = renderDishes;
+  $("eventDate").onchange = (e) => {
+    const before = season();
+    S.date = e.target.value || nextSunday(); render();
+    if (season() !== before) toast(`${SEASONS[season()].em} Цены пересчитаны на сезон «${SEASONS[season()].name}»`);
+  };
+  $("seasonBtn").onclick = () => {
+    const order = ["winter", "summer", "autumn"], auto = seasonOfDate(S.date);
+    const cur = season(), next = order[(order.indexOf(cur) + 1) % 3];
+    S.seasonManual = next === auto ? "" : next;
+    render();
+    toast(`${SEASONS[season()].em} Цены: ${SEASONS[season()].name}${S.seasonManual ? " (вручную)" : " (по дате)"}`);
+  };
+  $("search").oninput = () => { renderTiles(); renderDishGrid(); };
+  $("cvBack").onclick = () => { S.cat = ""; $("search").value = ""; renderTiles(); renderDishGrid(); };
+
+  // эффекты: блик на цветных блоках за курсором, «волна» на кнопках
+  document.addEventListener("pointermove", (e) => {
+    const t = e.target.closest && e.target.closest(".tile");
+    if (!t) return;
+    const r = t.getBoundingClientRect();
+    t.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
+    t.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
+  });
+  document.addEventListener("pointerdown", (e) => {
+    const b = e.target.closest && e.target.closest(".btn");
+    if (!b || b.disabled) return;
+    const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height);
+    const w = document.createElement("span");
+    w.className = "rp"; Object.assign(w.style, { width: s + "px", height: s + "px", left: (e.clientX - r.left - s / 2) + "px", top: (e.clientY - r.top - s / 2) + "px" });
+    b.appendChild(w); setTimeout(() => w.remove(), 650);
+  });
 
   document.addEventListener("click", (e) => {
     const t = e.target;
     const editBtn = t.closest && t.closest("[data-edit]");
-    if (editBtn) { openDishEditor(editBtn.dataset.edit); return; }
-    const tabBtn = t.closest && t.closest("[data-tab]");
-    if (tabBtn) {
-      S.tab = tabBtn.dataset.tab; render();
-      if ($("tabLayout").getBoundingClientRect().top < 0) $("tabLayout").scrollIntoView({ block: "start" });
+    if (editBtn) { e.stopPropagation(); openDishEditor(editBtn.dataset.edit); return; }
+    const goBtn = t.closest && t.closest("[data-go], [data-step]");
+    if (goBtn) { go(+(goBtn.dataset.go || goBtn.dataset.step)); return; }
+    const tile = t.closest && t.closest("[data-tile]");
+    if (tile) {
+      S.cat = S.cat === tile.dataset.tile && !$("search").value ? "" : tile.dataset.tile;
+      $("search").value = "";
+      renderTiles(); renderDishGrid(); save();
+      if (S.cat) setTimeout(() => $("catview").scrollIntoView({ behavior: "smooth", block: "start" }), 60);
       return;
     }
+    const pick = t.closest && t.closest("[data-pick]");
+    if (pick) { togglePick(pick.dataset.pick, pick); return; }
     const pair = (v) => v.split("|");
     const dEd = (id) => (S.dishEdits[id] ||= {});
     if (t.dataset.drm) { const [id, k] = pair(t.dataset.drm); dEd(id)[k] = 0; render(); return; }
@@ -615,24 +1007,35 @@
       dEd(id)[k] = q / (S.guests * groupK(S.guests));
       render(); return;
     }
-    if (t.dataset.cat) { catFilter = t.dataset.cat; renderDishes(); }
-    else if (t.dataset.undish) { S.dishes = S.dishes.filter(x => x !== t.dataset.undish); render(); }
+    if (t.dataset.undish) {
+      const id = t.dataset.undish, chip = t.closest(".chip");
+      const done = () => {
+        S.dishes = S.dishes.filter(x => x !== id); save();
+        if (S.step === 1) { renderTiles(); renderTray(); updateSteps(); const c = document.querySelector(`[data-pick="${id}"]`);
+          if (c) { c.classList.remove("on"); c.querySelector(".add").textContent = "+"; } }
+        else render();
+      };
+      if (chip) { chip.classList.add("out"); setTimeout(done, 220); } else done();
+    }
     else if (t.dataset.resetq) { const ed = S.edits[t.dataset.resetq]; if (ed) delete ed.qty; render(); }
     else if (t.dataset.resetp) { const ed = S.edits[t.dataset.resetp]; if (ed) delete ed.price; render(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    const pick = e.target.closest && e.target.closest("[data-pick]");
+    if (pick && (e.key === "Enter" || e.key === " ") && e.target === pick) { e.preventDefault(); togglePick(pick.dataset.pick, pick); }
+    const id = e.key === "Enter" && (e.target.dataset.daddqty || e.target.dataset.daddname);
+    if (id) { e.preventDefault(); document.querySelector(`[data-dadd="${id}"]`).click(); }
+    if (e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) && S.step === 1) { e.preventDefault(); $("search").focus(); }
   });
   document.addEventListener("change", (e) => {
     const t = e.target;
     const ed = (k) => (S.edits[k] ||= {});
     const val = (v) => { const n = parseFloat(String(v).replace(/\s/g, "").replace(",", ".")); return isFinite(n) && n >= 0 ? n : null; };
-    if (t.dataset.dish) {
-      S.dishes = t.checked ? [...S.dishes, t.dataset.dish] : S.dishes.filter(x => x !== t.dataset.dish);
-      render();
-    } else if (t.dataset.dq) {
+    if (t.dataset.dq) {
       const [id, k] = t.dataset.dq.split("|"), v = val(t.value);
       if (v != null) {
         const pg = v / (S.guests * groupK(S.guests));
         const ov = (S.dishEdits[id] ||= {});
-        // вернули то же число, что в справочнике, — правку не храним
         if (k in baseIngr(byId[id]) && Math.abs(baseIngr(byId[id])[k] - pg) < 1e-9) delete ov[k]; else ov[k] = pg;
         if (!Object.keys(ov).length) delete S.dishEdits[id];
       }
@@ -659,11 +1062,182 @@
     }
   });
 
-  // Enter в строке «+ продукт в блюдо» — то же, что «Добавить»
-  document.addEventListener("keydown", (e) => {
-    const id = e.key === "Enter" && (e.target.dataset.daddqty || e.target.dataset.daddname);
-    if (id) { e.preventDefault(); document.querySelector(`[data-dadd="${id}"]`).click(); }
+  // ── шаг 4: афиша (бордо и золото; стиль — poster-guide.html) ──
+  const FORMATS = {
+    post: { name: "Пост", sub: "WhatsApp, Instagram · 1080×1350", w: 1080, h: 1350 },
+    story: { name: "Сторис", sub: "Статус WhatsApp, Telegram · 1080×1920", w: 1080, h: 1920 },
+    a4: { name: "A4", sub: "печать · 2480×3508 (300 dpi)", w: 2480, h: 3508 },
+    a3: { name: "A3", sub: "печать · 3508×4961 (300 dpi)", w: 3508, h: 4961 },
+  };
+  const P = { bg1: "#6B1426", bg2: "#3A0812", gold: "#D4AF37", gold2: "#F3E2A9", gold3: "#A67C2E", cream: "#F5EBD7", creamDim: "rgba(245,235,215,.78)" };
+  function autoDesc(d) {
+    const skip = /^(масло|соль|сахар|вода|мука)/i;
+    const names = Object.entries(d.products || {}).sort((a, b) => b[1] - a[1]).map(([k]) => (CAT[k]?.name || "").replace(/\s*\(.*?\)|\s*\d+[,.]?\d*%/g, "").trim())
+      .filter((n, i, a) => n && !skip.test(n) && a.indexOf(n) === i).slice(0, 4).map(n => n.toLowerCase());
+    if (!names.length) return "";
+    const s = names.length > 1 ? names.slice(0, -1).join(", ") + " и " + names[names.length - 1] : names[0];
+    return s[0].toUpperCase() + s.slice(1);
+  }
+  const descOf = (id) => S.poster.desc[id] ?? autoDesc(byId[id]);
+  function renderPosterControls() {
+    const p = S.poster;
+    $("fmts").innerHTML = Object.entries(FORMATS).map(([k, f]) => `<button class="fmt ${p.fmt === k ? "on" : ""}" data-fmt="${k}"><b>${f.name}</b>${f.sub}</button>`).join("");
+    $("pTitle").value = p.title || S.event || "";
+    $("pTitle").placeholder = S.event || "Воскресный пир";
+    $("pSub").value = p.sub || "";
+    $("pSub").placeholder = defaultSub();
+    $("pFoot").value = p.foot || "";
+    const ids = S.dishes.slice(0, 12);
+    $("pdesc").innerHTML = ids.map(id => `<div><b>${esc(byId[id].name)}</b><textarea data-pdesc="${id}" rows="2">${esc(descOf(id))}</textarea></div>`).join("");
+    $("pInfo").textContent = S.dishes.length > 12 ? `На афише помещается 12 блюд — показаны первые 12 из ${S.dishes.length}.` : "";
+    drawPoster();
+  }
+  function defaultSub() {
+    if (!S.date) return "";
+    const d = new Date(S.date + "T12:00:00");
+    const s = d.toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" });
+    return s[0].toUpperCase() + s.slice(1);
+  }
+  const imgCache = {};
+  const loadImg = (src) => imgCache[src] || (imgCache[src] = new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; }));
+  function layoutFor(n, fmt) {
+    if (fmt === "story") return n <= 4 ? [1, n] : n <= 6 ? [2, 3] : n <= 8 ? [2, 4] : n <= 10 ? [2, 5] : [3, 4];
+    return n <= 1 ? [1, 1] : n <= 2 ? [2, 1] : n <= 4 ? [2, 2] : n <= 6 ? [3, 2] : n <= 9 ? [3, 3] : [3, 4];
+  }
+  function wrapLines(ctx, text, maxW, maxLines) {
+    const words = String(text || "").split(/\s+/).filter(Boolean), lines = [];
+    let cur = "";
+    for (const w of words) {
+      const t = cur ? cur + " " + w : w;
+      if (ctx.measureText(t).width <= maxW || !cur) cur = t; else { lines.push(cur); cur = w; }
+    }
+    if (cur) lines.push(cur);
+    if (lines.length > maxLines) { lines.length = maxLines; let l = lines[maxLines - 1]; while (ctx.measureText(l + "…").width > maxW && l.length > 1) l = l.slice(0, -1); lines[maxLines - 1] = l + "…"; }
+    return lines;
+  }
+  function goldGrad(ctx, x0, y0, x1, y1) {
+    const g = ctx.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, P.gold3); g.addColorStop(.35, P.gold2); g.addColorStop(.6, P.gold); g.addColorStop(1, P.gold3);
+    return g;
+  }
+  function ornament(ctx, cx, y, w, s) {  // линия — ромб — линия
+    ctx.save(); ctx.strokeStyle = goldGrad(ctx, cx - w / 2, y, cx + w / 2, y); ctx.fillStyle = P.gold; ctx.lineWidth = 2 * s;
+    ctx.beginPath(); ctx.moveTo(cx - w / 2, y); ctx.lineTo(cx - 18 * s, y); ctx.moveTo(cx + 18 * s, y); ctx.lineTo(cx + w / 2, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, y - 9 * s); ctx.lineTo(cx + 9 * s, y); ctx.lineTo(cx, y + 9 * s); ctx.lineTo(cx - 9 * s, y); ctx.closePath(); ctx.fill();
+    for (const dx of [-30, 30]) { ctx.beginPath(); ctx.arc(cx + dx * s, y, 3 * s, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+  function corner(ctx, x, y, s, fx, fy) {  // уголок рамки: завиток из дуг
+    ctx.save(); ctx.translate(x, y); ctx.scale(fx, fy); ctx.strokeStyle = P.gold; ctx.lineWidth = 2.2 * s;
+    ctx.beginPath(); ctx.moveTo(0, 70 * s); ctx.lineTo(0, 0); ctx.lineTo(70 * s, 0); ctx.stroke();
+    ctx.beginPath(); ctx.arc(22 * s, 22 * s, 14 * s, Math.PI, Math.PI * 1.5); ctx.stroke();
+    ctx.beginPath(); ctx.arc(22 * s, 22 * s, 6 * s, 0, Math.PI * 2); ctx.fillStyle = P.gold; ctx.fill();
+    ctx.restore();
+  }
+  function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  let drawSeq = 0;
+  async function drawPoster() {
+    const seq = ++drawSeq, p = S.poster, f = FORMATS[p.fmt] || FORMATS.post;
+    const cv = $("poster"), W = f.w, H = f.h, s = W / 1080;
+    $("canvasBox").classList.add("busy");
+    try { await Promise.all(["700 40px 'Cormorant Garamond'", "600 40px 'Cormorant Garamond'", "500 20px Manrope", "700 20px Manrope"].map(x => document.fonts.load(x))); } catch (e) {}
+    const ids = S.dishes.slice(0, 12);
+    const imgs = await Promise.all(ids.map(id => HAS_IMG.has(id) ? loadImg(`data/img/${id}.webp`) : Promise.resolve(null)));
+    if (seq !== drawSeq) return;
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext("2d");
+    // фон: бордо с мягким светом в центре и виньеткой
+    const bg = ctx.createRadialGradient(W / 2, H * .38, 50 * s, W / 2, H / 2, Math.max(W, H) * .75);
+    bg.addColorStop(0, P.bg1); bg.addColorStop(1, P.bg2);
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = .06; ctx.strokeStyle = P.gold; ctx.lineWidth = 1 * s;  // ромбическая сетка-орнамент
+    for (let x = -H; x < W + H; x += 46 * s) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + H, H); ctx.moveTo(x, H); ctx.lineTo(x + H, 0); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+    // двойная золотая рамка и уголки
+    const m1 = 30 * s, m2 = 42 * s;
+    ctx.strokeStyle = goldGrad(ctx, 0, 0, W, H); ctx.lineWidth = 3 * s; ctx.strokeRect(m1, m1, W - 2 * m1, H - 2 * m1);
+    ctx.lineWidth = 1.2 * s; ctx.strokeRect(m2, m2, W - 2 * m2, H - 2 * m2);
+    const c0 = 54 * s;
+    corner(ctx, c0, c0, s, 1, 1); corner(ctx, W - c0, c0, s, -1, 1); corner(ctx, c0, H - c0, s, 1, -1); corner(ctx, W - c0, H - c0, s, -1, -1);
+    // заголовок
+    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+    let y = 120 * s;
+    ctx.fillStyle = P.gold2; ctx.font = `700 ${22 * s}px Manrope`;
+    if (ctx.letterSpacing !== undefined) ctx.letterSpacing = `${6 * s}px`;
+    ctx.fillText("ПРИГЛАШАЕМ НА", W / 2, y);
+    if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+    const title = (p.title || S.event || "Воскресный пир").trim();
+    let ts = 92 * s;
+    ctx.font = `700 ${ts}px 'Cormorant Garamond'`;
+    while (ctx.measureText(title).width > W - 200 * s && ts > 44 * s) { ts -= 4 * s; ctx.font = `700 ${ts}px 'Cormorant Garamond'`; }
+    y += ts * 1.05;
+    ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 12 * s; ctx.shadowOffsetY = 3 * s;
+    ctx.fillStyle = goldGrad(ctx, W / 2 - 300 * s, y - ts, W / 2 + 300 * s, y);
+    ctx.fillText(title, W / 2, y);
+    ctx.shadowColor = "transparent";
+    const sub = (p.sub || defaultSub()).trim();
+    if (sub) { y += 52 * s; ctx.fillStyle = P.cream; ctx.font = `500 ${30 * s}px Manrope`; ctx.fillText(sub, W / 2, y); }
+    y += 40 * s; ornament(ctx, W / 2, y, 420 * s, s); y += 36 * s;
+    // сетка блюд
+    const foot = (p.foot || "").trim();
+    const bottom = H - (foot ? 150 : 96) * s;
+    const n = ids.length;
+    if (!n) { ctx.fillStyle = P.creamDim; ctx.font = `500 ${30 * s}px Manrope`; ctx.fillText("Выберите блюда на шаге «Меню»", W / 2, (y + bottom) / 2); }
+    else {
+      const [cols, rows] = layoutFor(n, p.fmt);
+      const padX = 84 * s, gap = 26 * s;
+      const cellW = (W - 2 * padX - gap * (cols - 1)) / cols, cellH = (bottom - y - gap * (rows - 1)) / rows;
+      const nameSize = Math.min(38 * s, Math.max(24 * s, cellW / 11)), descSize = Math.min(22 * s, Math.max(15 * s, cellW / 20));
+      const textH = nameSize * 2.3 + descSize * 2.6;
+      const photo = Math.max(60 * s, Math.min(cellW, cellH - textH));
+      ids.forEach((id, i) => {
+        const d = byId[id], t = tileOf(d);
+        const row = Math.floor(i / cols), inRow = Math.min(cols, n - row * cols), col = i % cols;
+        const offset = (cols - inRow) * (cellW + gap) / 2;  // неполный последний ряд — по центру
+        const x = padX + offset + col * (cellW + gap), yy = y + row * (cellH + gap);
+        const px = x + (cellW - photo) / 2, py = yy, r = 22 * s;
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 24 * s; ctx.shadowOffsetY = 8 * s;
+        rr(ctx, px, py, photo, photo, r); ctx.fillStyle = "#2a0710"; ctx.fill(); ctx.restore();
+        ctx.save(); rr(ctx, px, py, photo, photo, r); ctx.clip();
+        const im = imgs[i];
+        if (im) { const k = Math.max(photo / im.width, photo / im.height); ctx.drawImage(im, px + (photo - im.width * k) / 2, py + (photo - im.height * k) / 2, im.width * k, im.height * k); }
+        else {
+          const g = ctx.createRadialGradient(px + photo * .35, py + photo * .3, 5, px + photo / 2, py + photo / 2, photo * .8);
+          g.addColorStop(0, t.c); g.addColorStop(1, "#3a0a12"); ctx.fillStyle = g; ctx.fillRect(px, py, photo, photo);
+          ctx.font = `${photo * .42}px serif`; ctx.textBaseline = "middle"; ctx.fillText(t.em, px + photo / 2, py + photo / 2); ctx.textBaseline = "alphabetic";
+        }
+        ctx.restore();
+        ctx.strokeStyle = goldGrad(ctx, px, py, px + photo, py + photo); ctx.lineWidth = 3.5 * s; rr(ctx, px, py, photo, photo, r); ctx.stroke();
+        ctx.lineWidth = 1 * s; ctx.strokeStyle = "rgba(243,226,169,.55)"; rr(ctx, px + 7 * s, py + 7 * s, photo - 14 * s, photo - 14 * s, r * .7); ctx.stroke();
+        let ty = py + photo + nameSize * 1.15;
+        ctx.fillStyle = P.gold2; ctx.font = `700 ${nameSize}px 'Cormorant Garamond'`;
+        for (const l of wrapLines(ctx, d.name, cellW - 8 * s, 2)) { ctx.fillText(l, x + cellW / 2, ty); ty += nameSize * 1.02; }
+        ctx.fillStyle = P.creamDim; ctx.font = `500 ${descSize}px Manrope`; ty += descSize * .25;
+        for (const l of wrapLines(ctx, descOf(id), cellW - 8 * s, 2)) { ctx.fillText(l, x + cellW / 2, ty); ty += descSize * 1.3; }
+      });
+    }
+    if (foot) { ornament(ctx, W / 2, H - 118 * s, 260 * s, s); ctx.fillStyle = P.cream; ctx.font = `600 ${28 * s}px Manrope`; ctx.fillText(foot, W / 2, H - 74 * s); }
+    $("canvasBox").classList.remove("busy");
+  }
+  document.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.id === "pTitle" || t.id === "pSub" || t.id === "pFoot") { S.poster[{ pTitle: "title", pSub: "sub", pFoot: "foot" }[t.id]] = t.value; save(); drawPoster(); }
+    else if (t.dataset.pdesc) { S.poster.desc[t.dataset.pdesc] = t.value; save(); drawPoster(); }
   });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest && e.target.closest("[data-fmt]");
+    if (b) { S.poster.fmt = b.dataset.fmt; save(); renderPosterControls(); }
+  });
+  const posterName = () => `Афиша — ${(S.poster.title || S.event || "Воскресный пир").replace(/[\\/:*?"<>|]+/g, " ").trim()} — ${FORMATS[S.poster.fmt].name}.png`;
+  $("pDownload").onclick = () => $("poster").toBlob(b => {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = posterName();
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); toast("Афиша скачана");
+  }, "image/png");
+  $("pShare").onclick = () => $("poster").toBlob(async b => {
+    const file = new File([b], posterName(), { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: S.event || "Воскресный пир" }); } catch (e) {} }
+    else { toast("Отправка доступна на телефоне — на компьютере скачайте PNG"); }
+  }, "image/png");
 
   // ── экспорт ──
   function payload() {
@@ -675,7 +1249,7 @@
     }).filter(s => s.rows.length);
     const total = sections.reduce((t, s) => t + s.total, 0);
     const date = new Date().toLocaleDateString("ru-RU");
-    return { title: (S.event || "Воскресный пир") + " — закуп на " + S.guests + " гостей", date, guests: S.guests,
+    return { title: (S.event || "Воскресный пир") + " — закуп на " + S.guests + " гостей", date: S.date ? new Date(S.date + "T12:00").toLocaleDateString("ru-RU") : date, guests: S.guests,
              cook: S.cook || "", dishes: S.dishes.map(id => byId[id].name), sections, total };
   }
 
@@ -698,7 +1272,7 @@
     const ExcelJS = await loadExcelJS();
     const rows = computeRows().filter(r => !r.off && r.qty > 0);
     const title = (S.event || "Воскресный пир") + " — закуп на " + S.guests + " гостей";
-    const date = new Date().toLocaleDateString("ru-RU");
+    const date = S.date ? new Date(S.date + "T12:00").toLocaleDateString("ru-RU") : new Date().toLocaleDateString("ru-RU");
     const wb = new ExcelJS.Workbook();
     wb.creator = "Воскресный пир";
     const accent = "FFC2562B", soft = "FFF3E6DC";
@@ -771,7 +1345,7 @@
     // сводка
     summary.columns = [{ width: 30 }, { width: 18 }, { width: 16 }];
     summary.addRow([title]).font = { bold: true, size: 16, color: { argb: accent } };
-    summary.addRow([`Дата: ${date}   ·   Гостей: ${S.guests}${S.cook ? "   ·   Повар: " + S.cook : ""}`]);
+    summary.addRow([`Дата пира: ${date}   ·   Гостей: ${S.guests}   ·   Цены: ${SEASONS[season()].name} 2026${S.cook ? "   ·   Повар: " + S.cook : ""}`]);
     summary.addRow([]);
     summary.addRow(["Меню"]).font = { bold: true, size: 12 };
     S.dishes.forEach(id => summary.addRow(["• " + byId[id].name]));
@@ -838,7 +1412,7 @@
     } catch (err) {
       if (win) win.close();
       showDoc(`<p>Не удалось создать Google Таблицу: ${esc(err.message)}</p><p class="hint">Можно нажать «Скачать Excel» и открыть файл вручную.</p>`);
-    } finally { b.disabled = false; b.textContent = "📊 Открыть в Google Таблицах"; }
+    } finally { b.disabled = false; b.textContent = "📊 Google Таблица"; }
   };
 
   $("copyTextBtn").onclick = async () => {
@@ -850,7 +1424,7 @@
   $("printBtn").onclick = () => window.print();
   $("resetBtn").onclick = () => {
     if (!confirm("Сбросить блюда, правки количества и цен?")) return;
-    const keep = { webapp: S.webapp, cook: S.cook }; S = Object.assign(fresh(), keep); history.replaceState(null, "", location.pathname); render();
+    const keep = { webapp: S.webapp, cook: S.cook }; S = Object.assign(fresh(), keep); history.replaceState(null, "", location.pathname); go(1);
   };
   $("settingsBtn").onclick = () => { $("webappUrl").value = S.webapp || CFG.DOCS_WEBAPP_URL || ""; $("cookName").value = S.cook || ""; $("settings").showModal(); };
   $("settingsCancel").onclick = () => $("settings").close();
@@ -1009,7 +1583,8 @@
       <td><input data-p="name" value="${esc(c.name)}" aria-label="Название"></td>
       <td><select data-p="unit" aria-label="Единица">${opts([...new Set([...UNITS, c.unit])], c.unit)}</select></td>
       <td><select data-p="section" aria-label="Раздел">${opts(SECTION_NAMES, c.section)}</select></td>
-      <td><input class="pr" data-p="price" value="${Math.round(c.price || 0)}" inputmode="decimal" aria-label="Цена"><div class="src">${esc(c.price_src || "")}</div></td>
+      <td><input class="pr" data-p="price" value="${Math.round(catPrice(k) || 0)}" inputmode="decimal" aria-label="Цена"><div class="src">${c.season && !c.siteEdited
+          ? `❄️ ${Math.round(c.season.winter)} · ☀️ ${Math.round(c.season.summer)} · 🍂 ${Math.round(c.season.autumn)}` : esc(c.price_src || "")}</div></td>
       <td><button class="row-save" data-psave="${k}" hidden>Сохранить</button>
         ${k.startsWith("c") && !BASE_CAT[k] ? `<button class="x" data-pdel="${k}" title="Удалить продукт" aria-label="Удалить">✕</button>` : ""}</td>
     </tr>`;
@@ -1069,7 +1644,7 @@
     }
   });
 
-  render();
+  go(S.step, { keepScroll: true });
   loadRemote();
 })();
 </script>

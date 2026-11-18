@@ -25,12 +25,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from parse_history import load_history  # noqa: E402
+from parse_more import load_more  # noqa: E402
 from parse_retreat import load, num  # noqa: E402
 from price_sources import OCT, SEP  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 IDS_FILE = Path(__file__).parent / "dish_ids.json"
-BUTTER_PRICE = 3500  # гхи делаем сами из сливочного масла; средняя цена
+BUTTER_PRICE = 3500
+MANUAL_PRICES = {"pistachio": 9500}  # в закупах 2025–2026 не было — средняя цена очищенных фисташек, Алматы  # гхи делаем сами из сливочного масла; средняя цена
 
 # Разделы = вкладки в Google Таблице
 DAIRY, GROCERY, VEG, OTHER, SPICE, HOUSE = "Молочка", "Бакалея", "Овощи и фрукты", "Остальное", "Специи", "Хоз. часть"
@@ -132,6 +134,7 @@ PRODUCTS = {
     "peas_can": ("Горошек консервированный (банка 400 г)", "шт", GROCERY, ["зел горошек (банка 400 гр шт)"]),
     "mayo": ("Майонез постный (без яиц)", "шт", GROCERY, []),
     "walnut": ("Грецкий орех чищеный", "кг", GROCERY, ["грецкий орех чищенный"]),
+    "pistachio": ("Фисташки очищенные", "кг", GROCERY, []),
     "almond": ("Миндаль", "кг", GROCERY, ["миндаль"]),
     "cashew": ("Кешью", "кг", GROCERY, ["кешью"]),
     "hazelnut": ("Фундук", "кг", GROCERY, ["фундук"]),
@@ -381,6 +384,22 @@ ING_RULES = [
     (r"касури|кастори", "kasuri_methi"), (r"паприк", ("paprika", _pack100)), (r"спци|специя для плова", "plov_spice"),
     (r"барбарис", "barberry"), (r"черная соль", "black_salt"), (r"^соль", "salt"),
 ]
+ING_RULES = [  # опечатки и другие написания (архив, меню 2025–2026)
+    (r"^томат$|^томате$|помодор|помидоб", "tomato"), (r"активи|^биос", "kefir"), (r"цукин", "zucchini"),
+    (r"фасоль зел|мороженн\w* фасол|шасоль", "beans_green"), (r"тур дал|чана дал", "peas_split"), (r"мунг дал", "mung"),
+    (r"вермиш|вермеш", ("pasta", lambda raw, unit, price: 0.4 if "400" in raw or "пач" in raw else 1)),
+    (r"^кукуруза", "corn_can"), (r"киндза", "cilantro"), (r"^шинат", "spinach"), (r"^панит", "paneer"),
+    (r"фисташ", "pistachio"),
+] + ING_RULES
+ING_RULES += [  # меню на английском (Cooking 19.07.2026)
+    (r"^ghee$", "butter"), (r"basmati", "rice_basmati"), (r"patato|potato", "potato"), (r"cauliflower", "cauliflower"),
+    (r"^carrot", "carrot"), (r"green peas", "peas_frozen"), (r"paneer", "paneer"), (r"tomato", "tomato"),
+    (r"coriander leaves", "cilantro"), (r"cashew", "cashew"), (r"chickpea flour", "besan"), (r"spinach", "spinach"),
+    (r"yogurt", "kefir"), (r"wholemeal", "flour_whole"), (r"^flour", "flour"), (r"^sugar", "sugar"),
+    (r"semolina", "semolina"), (r"yellow raisins", "raisins_yellow"), (r"limon|lemon", "lemon"), (r"uradhal", "urad"),
+    (r"moongdhal", "mung"), (r"chanadhal|yellow peas", "peas_split"), (r"jandu", "beans_green"), (r"mint", "mint"),
+    (r"cucumber", "cucumber"),
+]
 ING_RULES = [(re.compile(p), r) for p, r in ING_RULES]
 
 
@@ -517,17 +536,174 @@ def category(name):
     return "Другое"
 
 
+# ── сабджи из старых меню: «Сабджи(картошка, цв капуста в сметане)» → «Картофель с цветной капустой в сметане» ──
+VEG_WORDS = [  # (слово в названии, именительный, творительный)
+    (r"картош|картоф", "Картофель", "картофелем"), (r"цв\.? ?капуст|цветн\w* капуст", "Цветная капуста", "цветной капустой"),
+    (r"капуст", "Капуста", "капустой"), (r"баклажан", "Баклажаны", "баклажанами"), (r"кабач", "Кабачки", "кабачками"),
+    (r"морков", "Морковь", "морковью"), (r"тыкв", "Тыква", "тыквой"), (r"фасол", "Фасоль", "фасолью"),
+    (r"нут|тур\w* горош", "Нут", "нутом"), (r"зел\w* гор", "Зелёный горошек", "зелёным горошком"),
+    (r"шпинат", "Шпинат", "шпинатом"), (r"панир", "Панир", "паниром"), (r"перец", "Перец", "перцем"),
+    (r"черри", "Черри", "черри"), (r"помидор", "Помидоры", "помидорами"), (r"огур", "Огурцы", "огурцами"),
+    (r"тесто", "Клёцки", "клёцками"), (r"сейтан", "Сейтан", "сейтаном"), (r"зелен", "Зелень", "зеленью"),
+]
+SAUCES = [(r"сметан", "в сметане"), (r"кефир|йогурт", "в сметане"), (r"сливк|молок", "в сливках"),
+          (r"томат", "в томате")]
+SAB_SAME = {  # уже есть в справочнике под этими названиями
+    ("Картофель", "Цветная капуста", ""): "Сабджи из картофеля и цветной капусты",
+    ("Картофель", "Тыква", ""): "Сабджи из картофеля и тыквы",
+    ("Баклажаны", "Морковь", "Перец", "Помидоры", "в томате"): "Сабджи в томатном соусе",
+    ("Баклажаны", "Морковь", "Перец", "Помидоры", ""): "Сабджи в томатном соусе",
+    ("Баклажаны", "Морковь", "Перец", "в томате"): "Сабджи в томатном соусе",
+    ("Картофель", "Капуста", ""): "Сабджи с капустой", ("Картофель", "Капуста", "в томате"): "Сабджи с капустой",
+    ("Картофель", "Капуста", "в сметане"): "Сабджи с капустой",
+    ("Картофель", "Зелень", ""): "Картофель с укропом", ("Картофель", ""): "Картофель с укропом",
+    ("Баклажаны", "Морковь", ""): "Сабджи в томатном соусе", ("Баклажаны", "Морковь", "в томате"): "Сабджи в томатном соусе",
+    ("Баклажаны", "Морковь", "в сметане"): "Сабджи в томатном соусе",
+    ("Баклажаны", "Кабачки", "Морковь", "в сметане"): "Баклажаны с кабачками и морковью в сметане",
+    ("Баклажаны", "Панир", ""): "Бринджал (баклажаны с паниром)", ("Баклажаны", "Панир", "в томате"): "Бринджал (баклажаны с паниром)",
+    ("Баклажаны", "Морковь", "Панир", "в томате"): "Бринджал (баклажаны с паниром)",
+    ("Картофель", "Цветная капуста", "Панир", ""): "Картофель с цветной капустой и паниром в сметане",
+    ("Картофель", "Нут", ""): "Картофель с нутом в томате",
+}
+
+
+def sabji_from_list(inner):
+    s = inner.lower()
+    sauce = next((v for rx, v in SAUCES if re.search(rx, s)), "")
+    s_wo = re.sub(r"в (сметане|томате|кефире|йогурте|сливках)|с молоком|со сливками|в сливках", "", s)
+    vegs = []
+    for rx, nom, ins in VEG_WORDS:
+        if re.search(rx, s_wo) and nom not in [v[0] for v in vegs]:
+            if nom == "Капуста" and any(v[0] == "Цветная капуста" for v in vegs) and not re.search(r"(^|[ ,])капуст", s_wo):
+                continue
+            vegs.append((nom, ins))
+            s_wo = re.sub(rx, " ", s_wo)
+    if not vegs:
+        return None
+    order = [v[1] for v in VEG_WORDS]
+    vegs.sort(key=lambda v: order.index(v[0]))
+    accents = {"Черри", "Помидоры", "Огурцы", "Зелень", "Перец"}
+    main = [v for v in vegs if v[0] not in accents]
+    if len(main) >= 2 or (main and sauce == "в томате"):
+        vegs = main
+    key = tuple(v[0] for v in vegs) + (sauce,)
+    if key in SAB_SAME:
+        return SAB_SAME[key]
+    head, rest = vegs[0][0], [v[1] for v in vegs[1:]]
+    name = head + (" с " + (", ".join(rest[:-1]) + " и " + rest[-1] if len(rest) > 1 else rest[0]) if rest else "")
+    if len(vegs) == 1 and not sauce:
+        name = "Сабджи: " + head.lower()
+    name = name.replace(" с шп", " со шп")
+    return (name + (" " + sauce if sauce else "")).replace("Сабджи: ", "Сабджи из ").replace("Сабджи из морковь", "Сабджи из моркови")
+
+
+JUNK = re.compile(r"^(\d+ ?(день|марта|мая)|день святого|воскресен|суббот|пятниц|завтрак|обед|ужин|список|количество|"
+                  r"комментар|повар|бензин|газ$|доп |доп$|additional|spices|subtot|total|стоимость|сухие|самостоят|"
+                  r"мастер класс|навоз|прабхупада$|вп |вп$|гаурапурнима|джанмаштами|уход |явление|нитьянанда|память|"
+                  r"воскресная программа|drink$|пицца|самосы \(навоз|выпечка в дорогу|сосиска|бургер|мешалк|лопатк|нож|"
+                  r"измельчител|погружн|одноразов|марля|шапочк|салфетк|комет|мистер|губки|железные|резиновые|моющее|"
+                  r"вафельная|активия|финики \(|напиток \(яблоки\)$|брюс)", re.I)
+
+# Новые блюда из архива и меню 2025–2026 (раньше общих правил DISH_RULES)
+MORE_RULES = [
+    (r"^(сабджи \()?(матар|марта|марат) панир", "Матар панир", SAB), (r"^сабджи милиджули", "Милиджули (овощи в сливках)", SAB),
+    (r"^(салат )?айчичук", "Салат айчичук", SAL), (r"^panch phoran|^$", lambda n, k: None, None),
+    (r"^подливка", "Подливка", SAUCE), (r"^(сабджи \()?(шак|палак) панир", "Шак панир", SAB),
+    (r"^(сабджи \()?махабр", "Махабриджал (баклажаны с нутом и шпинатом)", SAB),
+    (r"^(сабджи \()?милиджули", "Милиджули (овощи в сливках)", SAB),
+    (r"^сабджи \(тыква (в|со) сливк", "Тыква в сливках", SAB),
+    (r"^(картофельно-тыквенное сабджи|картошка с тыквой|сабджи из картофеля и тыквы)", "Сабджи из картофеля и тыквы", SAB),
+    (r"^сабджи картофель и цветная", "Сабджи из картофеля и цветной капусты", SAB),
+    (r"^сабджи (с кар,? цв капусты и паниром|с картофелем, цветной капустой и паниром)",
+     "Картофель с цветной капустой и паниром", SAB),
+    (r"^сабджи с баклажанами, морковью и бол перцем", "Сабджи в томатном соусе", SAB),
+    (r"^сабджи \((.+)\)$", lambda n, k: sabji_from_list(re.match(r"^сабджи \((.+)\)$", n).group(1)), SAB),
+    (r"^mix veg sabji", "Сабджи из смешанных овощей", SAB), (r"^сукта", "Сукта (овощи с горчинкой)", SAB),
+    (r"^алубонд", "Алу бонды (картофельные шарики в кляре)", SNACK), (r"^баларам", "Баларамы", SWEET),
+    (r"^бесан бурфи", "Бесан бурфи", SWEET), (r"^бурфи$", "Бурфи с фундуком", SWEET),
+    (r"^бисквит", "Бисквит со сгущенкой", BREAD), (r"^борщ", "Борщ", SOUP),
+    (r"^бунди ?лад", "Бунди ладду", SWEET), (r"^бутерброд", "Бутерброды с маслом и сыром", BREAD),
+    (r"^варуни", "Варуни", DRINK), (r"^гаджар ?вад", "Гаджар вады (морковные оладьи)", SNACK),
+    (r"^гаур", "Гауранга (картофель с брынзой)", SAB),
+    (r"^(джалеби|jalebi)", "Джалеби", SWEET), (r"^кофт", "Кофты в томатном соусе", SAB), (r"^каджа", "Каджа", SWEET),
+    (r"^картофельная закуска", "Картофельная закуска", SNACK),
+    (r"^картофельное карри", "Картофельное карри с фасолью и цветной капустой", SAB),
+    (r"^каша 5 злак", "Каша «5 злаков»", KASHA), (r"^каша кукуруз", "Каша кукурузная", KASHA),
+    (r"^каша пшенич", "Каша пшеничная с курагой", KASHA), (r"^каша пшен", "Каша пшенная с тыквой", KASHA),
+    (r"^овсянка с яблок", "Овсянка с яблоками и корицей", KASHA), (r"^кичари", "Кичри", SAB),
+    (r"^клубничная помадка", "Клубничная помадка", SWEET), (r"^ко\w*совые шарики", "Кокосовые шарики со сгущёнкой", SWEET),
+    (r"^кокосовые снег", "Кокосовые снежки", SWEET), (r"^кокосовое бурфи", "Кокосовое бурфи", SWEET),
+    (r"^(ладду|ладдху|ладу)$", "Ладду", SWEET), (r"^манохар", "Манохар ладду", SWEET),
+    (r"^лапша с овощ", "Лапша с овощами", SAB), (r"^ласси \(смород", "Ласси смородиновое", DRINK),
+    (r"^малпу", "Малпуа", SWEET), (r"^махабринджал", "Махабриджал (баклажаны с нутом и шпинатом)", SAB),
+    (r"^пакоры \(зел помид", "Пакоры из зелёных помидоров", SNACK), (r"^пакоры из цв", "Пакоры из цветной капусты", SNACK),
+    (r"^(микс )?пакор[аы]?$", "Микс пакоры", SNACK),
+    (r"^напиток \((клюкв)", "Клюквенный морс", DRINK), (r"^напиток \(яблочн", "Яблочный напиток", DRINK),
+    (r"^напиток из мяты", "Мятный напиток", DRINK), (r"^напиток ягодно", "Ягодно-яблочный напиток", DRINK),
+    (r"^напиток \(лимонный\+имбирь", "Лимонно-имбирный напиток", DRINK), (r"^напиток облепих", "Облепиховый напиток", DRINK),
+    (r"^цикорий с молоком", "Цикорий с молоком", DRINK),
+    (r"^овощи с паниром", "Овощи с паниром", SAB), (r"^овощное рагу", "Овощное рагу", SAB),
+    (r"^паровые овощи", "Паровые овощи", SAB), (r"^печенн?ые овощи", "Печёные овощи", SAB),
+    (r"^печенн?ая картошка", "Печёный картофель", SAB), (r"^овощная нарезка", "Овощная нарезка", SAL),
+    (r"^ореховая помадка", "Ореховая помадка", SWEET), (r"^плов от уз", "Плов овощной", SAB), (r"^плов от даяван", "Плов от Даяван махараджа", SAB),
+    (r"^чапати", "Чапати", BREAD), (r"^р[ао]сс?агул", "Расагулы", SWEET), (r"^расамала", "Рас малай", SWEET),
+    (r"^рис белый басмати с орех", "Рис басмати с паниром и кешью", SAB),
+    (r"^(рис пулао|рис \(овощн)", "Пулау (рис с овощами)", SAB), (r"^рис \(?пушпан", "Рис пушпанна", SAB),
+    (r"^рис с нутом", "Рис с нутом и кукурузой", SAB),
+    (r"^рис( \((басмати|белый)\)| белый| басмати| для детей| \(и для детей\))*( \(веган\))?$|^rice$",
+     lambda n, k: rice_name(k), SAB),
+    (r"^салат из капусты", "Салат из капусты", SAL), (r"^салат со сметаной", "Салат из помидоров со сметаной", SAL),
+    (r"^салат зелен", "Салат зеленый", SAL), (r"^(салад|salat)$", lambda n, k: salad_name(k), SAL),
+    (r"^(самосы \(сладк|сладкие самосы)", "Самосы сладкие", SNACK), (r"^самосы?$|^самоса$", "Самосы", SNACK),
+    (r"^сахи панир", "Шахи панир", SAB), (r"^сладкий рис \(из сабуд", "Сабудана кхир", SWEET),
+    (r"^(чатни \(сливов|яблочно-сливовое|сливовое)", "Сливовое чатни", SAUCE),
+    (r"^чатни \(?яблоч", "Яблочное чатни", SAUCE), (r"^(чатни помидор|чатни \(томт|томатное чатни)", "Томатное чатни", SAUCE),
+    (r"^чатни$", lambda n, k: "Сливовое чатни" if "plum" in k else "Яблочное чатни" if "apple" in k
+     else "Томатное чатни" if "tomato" in k else None, SAUCE),
+    (r"^(суп из чечевиц|чечевичный суп)", "Суп из чечевицы", SOUP), (r"^таматар панир$", "Таматар панир малай", SAB),
+    (r"^таматар тур", "Таматар тур-дал", SOUP), (r"^(gota kadhi)", "Гота кадхи (нутовые клёцки в йогурте)", SOUP),
+    (r"^dalma", "Далма (дал с овощами)", SOUP), (r"^(dhal|dal)$", lambda n, k: "Мунг дал (из маша)" if "mung" in k else "Дал из гороха", SOUP),
+    (r"^pineapple halwa", "Ананасовая халава", SWEET), (r"^puri$", "Пури", BREAD),
+    (r"^халава \(морков", "Морковная халава", SWEET), (r"^халава яблоч", "Яблочная халава", SWEET),
+    (r"^хлеб белый", "Хлеб белый", BREAD), (r"^хлеб ржаной|^хлеб$", "Хлеб ржаной", BREAD),
+    (r"^ша[рп]лотка", "Шарлотка с яблоками", BREAD), (r"^экадаш|^экадеш", "Экадашный хлеб из гречки", BREAD),
+    (r"^шрикант|^шрикханд", "Шрикханд", SWEET), (r"^чебур", "Чебуреки с паниром", BREAD),
+    (r"^(чола|cholla)", "Чола", SAB), (r"^джаганатх", "Джаганнатха дал", SOUP),
+    (r"^картофельное пюре", "Картофельное пюре", SAB), (r"^макароны", "Макароны", SAB),
+    (r"^(фрукты)", "Фрукты", FRUIT), (r"^суп из нута", "Суп из нута", SOUP), (r"^гречка", None, None),
+]
+MORE_RULES = [(re.compile(p), r, c) for p, r, c in MORE_RULES]
+
+
 def canonical(name, keys):
     """(название, раздел) или None — блюдо не берём."""
     n = norm(name)
+    n = re.sub(r"\s*\(", " (", n)
+    if JUNK.search(n):
+        return None
+    for rx, rule, cat in MORE_RULES:
+        if rx.search(n):
+            if rule is None and cat is None:
+                break  # дальше — общие правила
+            new = rule(n, keys) if callable(rule) else rule
+            if not new:
+                return None
+            return new, cat or category(new)
+    n = re.sub(r"\s*\([^()]*(веган|дет|ужин)[^()]*\)", "", n).strip()
     for rx, rule, cat in DISH_RULES:
         if rx.search(n):
             new = rule(n, keys) if callable(rule) else rule
             if new is None:
                 return None
+            if not new and re.match(r"^(сабджи|напиток|салат|салад|чатни)$", n):
+                return None
             new = new or name
             return new, cat or category(new)
-    return name, category(name)
+    if not (map_ing(n) and category(n) == "Другое"):
+        clean = re.sub(r"\s*\([^()]*(веган|дет|ужин)[^()]*\)", "", name, flags=re.I).strip()
+        clean = clean[:1].upper() + clean[1:]
+        return clean, category(clean)
+    return None  # просто продукт («апельсины», «кешью»), а не блюдо
 
 
 # ── майский ретрит: блюда как раньше ──
@@ -577,14 +753,70 @@ def retreat_occurrences(dishes_raw, alias):
     return occ, unknown
 
 
+def more_label(o):
+    """«20140831_список на Радхаштами.xls» → «Радхаштами 31.08.2014»."""
+    f = re.sub(r"\.(xlsx?|docx)$", "", o["file"])
+    f = re.sub(r"^\d{8}_?", "", f)
+    f = re.sub(r"^(список|меню)( на| для)? ", "", f, flags=re.I).strip(" _")
+    d = o.get("date")
+    return f"{f[:1].upper() + f[1:]} {d.strftime('%d.%m.%Y')}" if d else f
+
+
+def estimate_guests(more, ref):
+    """Файлы без числа гостей: по каждому блюду — общий вес / вес на гостя в справочнике, медиана по блюдам."""
+    by_file = defaultdict(list)
+    for o in more:
+        if o["guests"]:
+            continue
+        keys = {map_ing(r, u, p)[0] for r, _, p, u in o["items"] if map_ing(r, u, p)}
+        c = canonical(o["name"], keys)
+        if not c or c[0] not in ref:
+            continue
+        tot = sum(q * map_ing(r, u, p)[1] for r, q, p, u in o["items"] if map_ing(r, u, p) and map_ing(r, u, p)[0] not in SPICES)
+        if tot > 0 and ref[c[0]] > 0:
+            by_file[o["file"]].append(tot / ref[c[0]])
+    est = {}
+    for f, vals in by_file.items():
+        if len(vals) >= 2:
+            g = statistics.median(vals)
+            if 30 <= g <= 2000:
+                est[f] = int(round(g, -1))
+    return est
+
+
 def history_occurrences():
     hist, prices = load_history()
+    more, more_prices, _ = load_more()
+    for o in more:
+        o["label"] = more_label(o)
     occ, unknown = [], defaultdict(int)
-    for o in hist:
+
+    # вес блюда на гостя по файлам с известным числом гостей — для оценки остальных
+    ref_vals = defaultdict(list)
+    for o in hist + more:
         if not o["guests"]:
             continue
-        label = EVENTS.get(f"{o['file']}/{o['sheet']}") or EVENTS.get(o["file"], o["file"])
-        label = label.replace("{sheet}", o["sheet"])
+        hits = [(map_ing(r, u, p), q) for r, q, p, u in o["items"]]
+        keys = {h[0] for h, _ in hits if h}
+        c = canonical(o["name"], keys)
+        tot = sum(q * h[1] for h, q in hits if h and h[0] not in SPICES)
+        if c and tot > 0:
+            ref_vals[c[0]].append(tot / o["guests"])
+    est = estimate_guests(more, {k: statistics.median(v) for k, v in ref_vals.items()})
+    for o in more:
+        if not o["guests"] and o["file"] in est:
+            o["guests"], o["estimated"] = est[o["file"]], True
+
+    names_only = []
+    for o in hist + more:
+        if not o["guests"] or not o["items"]:
+            names_only.append(o["name"])
+            continue
+        if "label" in o:
+            label = o["label"]
+        else:
+            label = EVENTS.get(f"{o['file']}/{o['sheet']}") or EVENTS.get(o["file"], o["file"])
+            label = label.replace("{sheet}", o["sheet"])
         prods, spices = defaultdict(float), defaultdict(float)
         for raw, q, p, unit in o["items"]:
             hit = map_ing(raw, unit, p)
@@ -598,10 +830,100 @@ def history_occurrences():
         if "ужин" in o["name"].lower():
             tags.append("на ужин")
         name = re.sub(r"\s*\((веган|на ужин)\)\s*", " ", o["name"], flags=re.I).strip()
+        est = " (≈ оценка по раскладке)" if o.get("estimated") else ""
         occ.append({"name": name[:1].upper() + name[1:], "tags": tags, "may": False, "guests": o["guests"],
-                    "label": label, "source": f"{label}, на {int(o['guests'])} чел.",
-                    "products": dict(prods), "spices": dict(spices)})
-    return occ, prices, unknown
+                    "label": label, "source": f"{label}, на {int(o['guests'])} чел.{est}",
+                    "products": dict(prods), "spices": dict(spices), "date": o.get("date")})
+    return occ, prices, unknown, more_prices, names_only
+
+
+SEASONS = ("winter", "summer", "autumn")
+
+
+def season_of(month):
+    return "summer" if month in (6, 7, 8) else "autumn" if month in (9, 10, 11) else "winter"
+
+
+# Во сколько раз цена сезона отличается от среднегодовой (Алматы: летом и осенью — урожай, зимой — теплицы и привоз)
+SEASON_COEF = {
+    "greens": (1.30, 0.70, 0.90),        # зелень, шпинат, салат
+    "tender": (1.35, 0.70, 0.85),        # помидоры, огурцы, перец, баклажаны, кабачки, черри
+    "roots": (1.10, 1.00, 0.85),         # картофель, морковь, свёкла, капуста, тыква
+    "veg": (1.15, 0.85, 0.90),           # прочие овощи
+    "berries": (1.50, 0.75, 1.00),       # свежие ягоды и косточковые
+    "orchard": (1.10, 1.15, 0.80),       # яблоки, груши — дешевле всего осенью
+    "citrus": (0.90, 1.15, 1.00),        # лимоны, апельсины, мандарины — сезон зимой
+    "dairy": (1.03, 0.95, 1.00),
+    "flat": (1.00, 1.00, 1.00),
+}
+_GROUPS = {
+    "greens": {"cilantro", "dill", "parsley", "mint", "basil", "spinach", "lettuce", "iceberg"},
+    "tender": {"tomato", "cherry", "cucumber", "pepper_bell", "eggplant", "zucchini", "chili", "beans_green", "radish"},
+    "roots": {"potato", "carrot", "carrot_yellow", "beet", "cabbage", "pumpkin", "peking", "cauliflower", "broccoli"},
+    "berries": {"strawberry", "raspberry", "apricot", "nectarine", "plum", "grape", "currant", "currant_red"},
+    "orchard": {"apple", "pear"},
+    "citrus": {"lemon", "orange", "mandarin"},
+}
+
+
+def season_group(key, section):
+    for g, keys in _GROUPS.items():
+        if key in keys:
+            return g
+    if section == "Овощи и фрукты":
+        return "veg" if key not in ("banana", "ginger", "fig", "dates", "kuraga") else "flat"
+    if section == "Молочка" and key != "butter":
+        return "dairy"
+    return "flat"
+
+
+def seasonal_prices(catalog, may, more_prices):
+    """catalog[key]["season"] = {winter, summer, autumn}: фактические закупы 2026 по сезонам, если есть;
+    иначе — от цены, которая есть, через сезонный коэффициент. Цены 2025 года — +10% (рост цен к 2026)."""
+    obs = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))  # key → season → источник → [цены]
+    for fname, raw, p, q, unit, when in more_prices:
+        hit = map_ing(raw, unit, p)
+        if not hit or p <= 0 or (hit[0] == "karkade" and hit[1] != 1):
+            continue
+        key, f = hit
+        obs[key][season_of(when.month)][fname].append(p / f * (1.10 if when.year == 2025 else 1))
+    for key, vals in may.items():
+        obs[key]["winter"]["Майский ретрит 2026"].extend(vals)
+    for src, table in (("Закуп 17.10.2026", OCT), ("Радхаштами 2026", SEP)):
+        for k, (p, _) in table.items():
+            key = PRICE_ALIASES.get(k)
+            if key:
+                obs[key]["autumn"][src].append(p)
+
+    names = {"winter": "зима–весна", "summer": "лето", "autumn": "осень"}
+    for key, c in catalog.items():
+        base = c.get("price")
+        if not base:
+            continue
+        if key == "butter" or c["section"] in ("Специи", "Хоз. часть"):
+            c["season"] = {s: base for s in SEASONS}
+            c["season_src"] = {s: c.get("price_src", "") for s in SEASONS}
+            continue
+        coef = dict(zip(SEASONS, SEASON_COEF[season_group(key, c["section"])]))
+        seen, srcs = {}, {}
+        for s in SEASONS:
+            files = obs.get(key, {}).get(s, {})
+            per_file = [statistics.mean(v) for v in files.values() if v]
+            if per_file:
+                m = statistics.median(per_file)
+                if base / 2.2 <= m <= base * 2.2:  # явные ошибки в таблицах (цена за упаковку вместо кг) — мимо
+                    seen[s] = m
+                    srcs[s] = f"закупы 2026, {names[s]} ({len(per_file)} файл.)"
+        if seen:
+            annual = statistics.median([v / coef[s] for s, v in seen.items()])
+        else:
+            annual = base / (coef["winter"] if c.get("price_src") == "май 2026" else statistics.mean(coef.values()))
+        out = {}
+        for s in SEASONS:
+            v = seen.get(s, annual * coef[s])
+            out[s] = int(round(v, -1)) if v >= 100 else round(v, 1)
+            srcs.setdefault(s, "расчёт по сезону" if coef[s] != 1 else c.get("price_src", ""))
+        c["season"], c["season_src"] = out, srcs
 
 
 FATS = {"butter", "oil", "oil_corn", "oil_unref"}
@@ -678,7 +1000,7 @@ def build():
 
     # ── все приготовления блюд ──
     occ, unknown = retreat_occurrences(dishes_raw, alias)
-    hocc, hist_prices, hunknown = history_occurrences()
+    hocc, hist_prices, hunknown, more_prices, names_only = history_occurrences()
     for k, v in hunknown.items():
         unknown[k] += v
     meal_people = {}
@@ -702,6 +1024,28 @@ def build():
             if t not in tags[name]:
                 tags[name].append(t)
 
+    # один и тот же набор овощей в разных соусах — одно блюдо (соус — как чаще всего готовили)
+    by_base = defaultdict(list)
+    for name in list(groups):
+        m = re.match(r"^(.+?) (в сметане|в томате|в сливках)$", name)
+        base = m.group(1) if m else name
+        if cats.get(name) == SAB:
+            by_base[base].append(name)
+    for base, names in by_base.items():
+        if len(names) > 1:
+            main = max(names, key=lambda x: (len(groups[x]), x != base))
+            for x in names:
+                if x != main:
+                    groups[main].extend(groups.pop(x))
+    # архив 2011–2019: раскладку берём, только если блюдо больше нигде не готовили (новые меню точнее)
+    for name, group in groups.items():
+        modern = [o for o in group if not (o.get("date") and o["date"].year < 2023)]
+        if modern and len(modern) < len(group):
+            groups[name] = modern
+    # блюда, у которых нигде нет раскладки (только название в меню)
+    no_recipe = sorted({c[0] for n in names_only for c in [canonical(n, set())] if c and c[0] not in groups
+                        and c[0] not in SITE_DISHES})
+
     # ── id: прежние блюда сохраняют свои id (на них ссылаются правки на сайте и выбор у повара) ──
     ids = json.loads(IDS_FILE.read_text(encoding="utf-8")) if IDS_FILE.exists() else {}
     if not ids:
@@ -712,6 +1056,7 @@ def build():
                          "Плов": "Плов овощной"}.items():
             ids[now] = ids.pop(was)
     nxt = max(int(v[1:]) for v in ids.values()) + 1
+    old_names = set(ids)
     for name in sorted(groups):
         if name not in ids:
             ids[name], nxt = f"d{nxt}", nxt + 1
@@ -728,6 +1073,24 @@ def build():
                           "products": {k: round(v, 5) for k, v in prods.items()},
                           "spices": {k: round(v, 6) for k, v in spices.items()}, "id": ids[name]})
         report.append((name, group, prods))
+    # новые блюда из одного-двух старых меню: если продуктов на гостя намного больше, чем обычно в этом разделе
+    # (в файле было меньше гостей, чем ели на самом деле), — приводим к типичной порции раздела
+    def weight(d):
+        return sum(v for k, v in d["products"].items() if PRODUCTS.get(k, ("", ""))[1] in ("кг", "л"))
+    by_cat = defaultdict(list)
+    for d in dish_list:
+        if d["name"] in old_names and weight(d) > 0:
+            by_cat[d["category"]].append(weight(d))
+    for d in dish_list:
+        w, ref = weight(d), by_cat.get(d["category"])
+        if d["name"] in old_names or not ref or len(ref) < 3 or d["category"] in (DRINK, FRUIT) or w <= 0:
+            continue
+        m = statistics.median(ref)
+        if w > m * 1.8:
+            f = m * 1.2 / w
+            d["products"] = {k: round(v * f, 5) for k, v in d["products"].items()}
+            d["spices"] = {k: round(v * f, 6) for k, v in d["spices"].items()}
+            d["source"] += f"; порция приведена к типичной для раздела (×{f:.2f})"
     dish_list.sort(key=lambda d: (d["category"], d["name"]))
     IDS_FILE.write_text(json.dumps(ids, ensure_ascii=False, indent=1), encoding="utf-8")
 
@@ -745,6 +1108,10 @@ def build():
             key = PRICE_ALIASES.get(k)
             if key:
                 by_file[key][src].append(p)
+    for fname, raw, p, q, unit, when in more_prices:  # меню 2026 из папки «пир»
+        hit = map_ing(raw, unit, p)
+        if hit and p > 0 and when.year == 2026 and not (hit[0] == "karkade" and hit[1] != 1):
+            by_file[hit[0]][fname].append(p / hit[1])
 
     def avg_price(key):
         vals = [statistics.mean(v) for v in by_file.get(key, {}).values()]
@@ -765,6 +1132,8 @@ def build():
             return round(statistics.mean(may[key])), "май 2026"
         if avg:
             return int(round(avg, -1)), f"среднее по {n} файл." if n > 1 else "из 1 файла"
+        if key in MANUAL_PRICES:
+            return MANUAL_PRICES[key], "оценка 2026"
         return None, ""
 
     catalog = {}
@@ -803,6 +1172,9 @@ def build():
         catalog[key] = {"name": name, "unit": unit, "section": HOUSE, "price": p, "price_src": src,
                         "per_guest": per_guest, "default": default}
 
+    # ── сезонные цены 2026: зима–весна (дек–май), лето (июн–авг), осень (сен–ноя) ──
+    seasonal_prices(catalog, may, more_prices)
+
     # ── запись ──
     (ROOT / "data").mkdir(exist_ok=True)
     head = ("// Сгенерировано tools/build_data.py из «20260502_Меню на Майский ретрит.xlsx», меню и закупов 2023–2026\n"
@@ -815,7 +1187,7 @@ def build():
         "// source — откуда взят расчёт (мероприятие и число гостей; для нескольких — медиана).\n"
         "window.DISHES = " + json.dumps(dish_list, ensure_ascii=False, indent=1) + ";\n", encoding="utf-8")
     return {"dishes": dish_list, "catalog": catalog, "unknown": unknown, "report": report, "skipped": skipped,
-            "prices": price_report, "by_file": by_file}
+            "prices": price_report, "by_file": by_file, "no_recipe": no_recipe}
 
 
 if __name__ == "__main__":
@@ -830,4 +1202,5 @@ if __name__ == "__main__":
     for c, ns in cats.items():
         print(f"{c} ({len(ns)}): " + "; ".join(ns))
     print("\nбез цены:", [v["name"] for v in catalog.values() if not v["price"]])
+    print("\nбез раскладки (только название в меню):", res["no_recipe"])
     print("уже есть на сайте (не дублируем):", {k: len(v) for k, v in res["skipped"].items()})

@@ -1,2 +1,6 @@
 ﻿__pycache__/
 *.pyc
+
+tools/_*.log
+tools/_*.txt
+пир/
