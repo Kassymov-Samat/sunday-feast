@@ -397,12 +397,12 @@ window.CATALOG = {
   "name": "Капуста квашеная",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 1500,
-  "price_src": "из 1 файла",
+  "price": 1800,
+  "price_src": "из 1 файла (в ценах 2026)",
   "season": {
-   "winter": 1780,
-   "summer": 1320,
-   "autumn": 1400
+   "winter": 2140,
+   "summer": 1580,
+   "autumn": 1680
   },
   "season_src": {
    "winter": "расчёт по сезону",
@@ -601,8 +601,8 @@ window.CATALOG = {
   "name": "Петрушка",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 1500,
-  "price_src": "среднее по 8 файл.",
+  "price": 1530,
+  "price_src": "среднее по 9 файл. (в ценах 2026)",
   "season": {
    "winter": 1100,
    "summer": 760,
@@ -652,8 +652,8 @@ window.CATALOG = {
   "name": "Мята свежая",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 1570,
-  "price_src": "среднее по 13 файл.",
+  "price": 1640,
+  "price_src": "среднее по 13 файл. (в ценах 2026)",
   "season": {
    "winter": 1500,
    "summer": 1320,
@@ -680,6 +680,40 @@ window.CATALOG = {
    "winter": "закупы 2026, зима–весна (7 файл.)",
    "summer": "закупы 2026, лето (2 файл.)",
    "autumn": "закупы 2026, осень (6 файл.)"
+  }
+ },
+ "pineapple": {
+  "name": "Ананас",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 1000,
+  "price_src": "из 1 файла (в ценах 2026)",
+  "season": {
+   "winter": 1350,
+   "summer": 1000,
+   "autumn": 1060
+  },
+  "season_src": {
+   "summer": "закупы 2026, лето (1 файл.)",
+   "winter": "расчёт по сезону",
+   "autumn": "расчёт по сезону"
+  }
+ },
+ "karela": {
+  "name": "Карела (горькая тыква)",
+  "unit": "кг",
+  "section": "Овощи и фрукты",
+  "price": 3000,
+  "price_src": "оценка 2026",
+  "season": {
+   "winter": 3570,
+   "summer": 2640,
+   "autumn": 2790
+  },
+  "season_src": {
+   "winter": "расчёт по сезону",
+   "summer": "расчёт по сезону",
+   "autumn": "расчёт по сезону"
   }
  },
  "chili": {
@@ -822,8 +856,8 @@ window.CATALOG = {
   "name": "Слива",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 700,
-  "price_src": "среднее по 3 файл.",
+  "price": 740,
+  "price_src": "среднее по 3 файл. (в ценах 2026)",
   "season": {
    "winter": 1160,
    "summer": 580,
@@ -839,8 +873,8 @@ window.CATALOG = {
   "name": "Абрикосы",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 620,
-  "price_src": "среднее по 4 файл.",
+  "price": 670,
+  "price_src": "среднее по 4 файл. (в ценах 2026)",
   "season": {
    "winter": 1320,
    "summer": 550,
@@ -856,8 +890,8 @@ window.CATALOG = {
   "name": "Нектарины / персики",
   "unit": "кг",
   "section": "Овощи и фрукты",
-  "price": 670,
-  "price_src": "среднее по 3 файл.",
+  "price": 710,
+  "price_src": "среднее по 3 файл. (в ценах 2026)",
   "season": {
    "winter": 980,
    "summer": 550,
@@ -907,25 +941,25 @@ window.CATALOG = {
   "name": "Смородина красная замороженная",
   "unit": "кг",
   "section": "Заморозка",
-  "price": 1200,
-  "price_src": "из 1 файла",
+  "price": 1320,
+  "price_src": "из 1 файла (в ценах 2026)",
   "season": {
-   "winter": 1200,
-   "summer": 1200,
-   "autumn": 1200
+   "winter": 1320,
+   "summer": 1320,
+   "autumn": 1320
   },
   "season_src": {
-   "winter": "из 1 файла",
-   "summer": "из 1 файла",
-   "autumn": "из 1 файла"
+   "winter": "из 1 файла (в ценах 2026)",
+   "summer": "из 1 файла (в ценах 2026)",
+   "autumn": "из 1 файла (в ценах 2026)"
   }
  },
  "raspberry": {
   "name": "Малина замороженная",
   "unit": "кг",
   "section": "Заморозка",
-  "price": 1800,
-  "price_src": "из 1 файла",
+  "price": 2160,
+  "price_src": "из 1 файла (в ценах 2026)",
   "season": {
    "winter": 1650,
    "summer": 1650,
@@ -933,25 +967,42 @@ window.CATALOG = {
   },
   "season_src": {
    "autumn": "закупы 2026, осень (1 файл.)",
-   "winter": "из 1 файла",
-   "summer": "из 1 файла"
+   "winter": "из 1 файла (в ценах 2026)",
+   "summer": "из 1 файла (в ценах 2026)"
   }
  },
  "cherry_frozen": {
   "name": "Вишня замороженная",
   "unit": "кг",
   "section": "Заморозка",
-  "price": 2150,
-  "price_src": "из 1 файла",
+  "price": 2580,
+  "price_src": "из 1 файла (в ценах 2026)",
   "season": {
-   "winter": 2150,
-   "summer": 2150,
-   "autumn": 2150
+   "winter": 2580,
+   "summer": 2580,
+   "autumn": 2580
   },
   "season_src": {
-   "winter": "из 1 файла",
-   "summer": "из 1 файла",
-   "autumn": "из 1 файла"
+   "winter": "из 1 файла (в ценах 2026)",
+   "summer": "из 1 файла (в ценах 2026)",
+   "autumn": "из 1 файла (в ценах 2026)"
+  }
+ },
+ "sea_buckthorn": {
+  "name": "Облепиха замороженная",
+  "unit": "кг",
+  "section": "Заморозка",
+  "price": 3450,
+  "price_src": "среднее по 2 файл. (в ценах 2026)",
+  "season": {
+   "winter": 2750,
+   "summer": 2620,
+   "autumn": 2500
+  },
+  "season_src": {
+   "winter": "закупы 2026, зима–весна (1 файл.)",
+   "autumn": "закупы 2026, осень (1 файл.)",
+   "summer": "среднее по 2 файл. (в ценах 2026)"
   }
  },
  "peas_frozen": {
@@ -1056,6 +1107,40 @@ window.CATALOG = {
    "autumn": "закупы 2026, осень (3 файл.)"
   }
  },
+ "corn_grits": {
+  "name": "Крупа кукурузная",
+  "unit": "кг",
+  "section": "Бакалея",
+  "price": 800,
+  "price_src": "май 2026",
+  "season": {
+   "winter": 840,
+   "summer": 840,
+   "autumn": 840
+  },
+  "season_src": {
+   "winter": "закупы 2026, зима–весна (2 файл.)",
+   "summer": "май 2026",
+   "autumn": "май 2026"
+  }
+ },
+ "sabudana": {
+  "name": "Саго (сабудана)",
+  "unit": "кг",
+  "section": "Бакалея",
+  "price": 2500,
+  "price_src": "оценка 2026",
+  "season": {
+   "winter": 2500,
+   "summer": 2500,
+   "autumn": 2500
+  },
+  "season_src": {
+   "winter": "оценка 2026",
+   "summer": "оценка 2026",
+   "autumn": "оценка 2026"
+  }
+ },
  "millet": {
   "name": "Пшено",
   "unit": "кг",
@@ -1086,23 +1171,6 @@ window.CATALOG = {
   },
   "season_src": {
    "winter": "закупы 2026, зима–весна (2 файл.)",
-   "summer": "май 2026",
-   "autumn": "май 2026"
-  }
- },
- "corn_grits": {
-  "name": "Крупа кукурузная",
-  "unit": "кг",
-  "section": "Бакалея",
-  "price": 800,
-  "price_src": "май 2026",
-  "season": {
-   "winter": 800,
-   "summer": 800,
-   "autumn": 800
-  },
-  "season_src": {
-   "winter": "закупы 2026, зима–весна (1 файл.)",
    "summer": "май 2026",
    "autumn": "май 2026"
   }
@@ -1315,17 +1383,17 @@ window.CATALOG = {
   "name": "Маш",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 850,
-  "price_src": "среднее по 6 файл.",
+  "price": 1210,
+  "price_src": "среднее по 6 файл. (в ценах 2026)",
   "season": {
    "winter": 1100,
-   "summer": 1100,
-   "autumn": 1100
+   "summer": 2100,
+   "autumn": 1600
   },
   "season_src": {
    "winter": "закупы 2026, зима–весна (3 файл.)",
-   "summer": "среднее по 6 файл.",
-   "autumn": "среднее по 6 файл."
+   "summer": "закупы 2026, лето (2 файл.)",
+   "autumn": "среднее по 6 файл. (в ценах 2026)"
   }
  },
  "urad": {
@@ -1536,17 +1604,17 @@ window.CATALOG = {
   "name": "Майонез постный (без яиц)",
   "unit": "шт",
   "section": "Бакалея",
-  "price": 450,
-  "price_src": "из 1 файла",
+  "price": 500,
+  "price_src": "из 1 файла (в ценах 2026)",
   "season": {
-   "winter": 450,
-   "summer": 450,
-   "autumn": 450
+   "winter": 500,
+   "summer": 500,
+   "autumn": 500
   },
   "season_src": {
-   "winter": "из 1 файла",
-   "summer": "из 1 файла",
-   "autumn": "из 1 файла"
+   "winter": "из 1 файла (в ценах 2026)",
+   "summer": "из 1 файла (в ценах 2026)",
+   "autumn": "из 1 файла (в ценах 2026)"
   }
  },
  "walnut": {
@@ -1791,8 +1859,8 @@ window.CATALOG = {
   "name": "Инжир сушёный",
   "unit": "кг",
   "section": "Бакалея",
-  "price": 2250,
-  "price_src": "среднее по 2 файл.",
+  "price": 2350,
+  "price_src": "среднее по 2 файл. (в ценах 2026)",
   "season": {
    "winter": 2280,
    "summer": 2200,
@@ -1801,7 +1869,7 @@ window.CATALOG = {
   "season_src": {
    "summer": "закупы 2026, лето (1 файл.)",
    "autumn": "закупы 2026, осень (2 файл.)",
-   "winter": "среднее по 2 файл."
+   "winter": "среднее по 2 файл. (в ценах 2026)"
   }
  },
  "dates": {
@@ -1961,8 +2029,8 @@ window.CATALOG = {
   "name": "Листья нори (пачка)",
   "unit": "пачка",
   "section": "Бакалея",
-  "price": 3210,
-  "price_src": "среднее по 2 файл.",
+  "price": 3330,
+  "price_src": "среднее по 2 файл. (в ценах 2026)",
   "season": {
    "winter": 4400,
    "summer": 4400,
@@ -1970,8 +2038,8 @@ window.CATALOG = {
   },
   "season_src": {
    "winter": "закупы 2026, зима–весна (1 файл.)",
-   "summer": "среднее по 2 файл.",
-   "autumn": "среднее по 2 файл."
+   "summer": "среднее по 2 файл. (в ценах 2026)",
+   "autumn": "среднее по 2 файл. (в ценах 2026)"
   }
  },
  "chicory": {
@@ -2013,7 +2081,7 @@ window.CATALOG = {
   "unit": "кг",
   "section": "Бакалея",
   "price": 10000,
-  "price_src": "из 1 файла",
+  "price_src": "из 1 файла (в ценах 2026)",
   "season": {
    "winter": 11000,
    "summer": 11000,
@@ -2021,8 +2089,8 @@ window.CATALOG = {
   },
   "season_src": {
    "winter": "закупы 2026, зима–весна (1 файл.)",
-   "summer": "из 1 файла",
-   "autumn": "из 1 файла"
+   "summer": "из 1 файла (в ценах 2026)",
+   "autumn": "из 1 файла (в ценах 2026)"
   }
  },
  "karkade": {
@@ -2063,17 +2131,17 @@ window.CATALOG = {
   "name": "Сироп шиповника (бутылка)",
   "unit": "шт",
   "section": "Бакалея",
-  "price": 1500,
-  "price_src": "из 1 файла",
+  "price": 1650,
+  "price_src": "из 1 файла (в ценах 2026)",
   "season": {
-   "winter": 1500,
-   "summer": 1500,
-   "autumn": 1500
+   "winter": 1650,
+   "summer": 1650,
+   "autumn": 1650
   },
   "season_src": {
-   "winter": "из 1 файла",
-   "summer": "из 1 файла",
-   "autumn": "из 1 файла"
+   "winter": "из 1 файла (в ценах 2026)",
+   "summer": "из 1 файла (в ценах 2026)",
+   "autumn": "из 1 файла (в ценах 2026)"
   }
  },
  "thyme": {
@@ -2264,19 +2332,19 @@ window.CATALOG = {
   "name": "Чана масала",
   "unit": "пачка",
   "section": "Специи",
-  "price": 1500,
-  "price_src": "из 1 файла",
+  "price": 1650,
+  "price_src": "из 1 файла (в ценах 2026)",
   "per100": 0.0,
   "default": false,
   "season": {
-   "winter": 1500,
-   "summer": 1500,
-   "autumn": 1500
+   "winter": 1650,
+   "summer": 1650,
+   "autumn": 1650
   },
   "season_src": {
-   "winter": "из 1 файла",
-   "summer": "из 1 файла",
-   "autumn": "из 1 файла"
+   "winter": "из 1 файла (в ценах 2026)",
+   "summer": "из 1 файла (в ценах 2026)",
+   "autumn": "из 1 файла (в ценах 2026)"
   }
  },
  "black_pepper": {
@@ -2302,38 +2370,38 @@ window.CATALOG = {
   "name": "Чили молотый, 100 г",
   "unit": "пачка",
   "section": "Специи",
-  "price": 850,
-  "price_src": "среднее по 4 файл.",
+  "price": 900,
+  "price_src": "среднее по 4 файл. (в ценах 2026)",
   "per100": 0.0,
   "default": false,
   "season": {
-   "winter": 850,
-   "summer": 850,
-   "autumn": 850
+   "winter": 900,
+   "summer": 900,
+   "autumn": 900
   },
   "season_src": {
-   "winter": "среднее по 4 файл.",
-   "summer": "среднее по 4 файл.",
-   "autumn": "среднее по 4 файл."
+   "winter": "среднее по 4 файл. (в ценах 2026)",
+   "summer": "среднее по 4 файл. (в ценах 2026)",
+   "autumn": "среднее по 4 файл. (в ценах 2026)"
   }
  },
  "ginger_ground": {
   "name": "Имбирь молотый, 100 г",
   "unit": "пачка",
   "section": "Специи",
-  "price": 550,
-  "price_src": "среднее по 2 файл.",
+  "price": 680,
+  "price_src": "среднее по 2 файл. (в ценах 2026)",
   "per100": 0.0,
   "default": false,
   "season": {
-   "winter": 550,
-   "summer": 550,
-   "autumn": 550
+   "winter": 680,
+   "summer": 680,
+   "autumn": 680
   },
   "season_src": {
-   "winter": "среднее по 2 файл.",
-   "summer": "среднее по 2 файл.",
-   "autumn": "среднее по 2 файл."
+   "winter": "среднее по 2 файл. (в ценах 2026)",
+   "summer": "среднее по 2 файл. (в ценах 2026)",
+   "autumn": "среднее по 2 файл. (в ценах 2026)"
   }
  },
  "salt": {
@@ -2473,57 +2541,57 @@ window.CATALOG = {
   "name": "Мускатный орех, 100 г",
   "unit": "пачка",
   "section": "Специи",
-  "price": 950,
-  "price_src": "среднее по 4 файл.",
+  "price": 990,
+  "price_src": "среднее по 4 файл. (в ценах 2026)",
   "per100": 0.0,
   "default": false,
   "season": {
-   "winter": 950,
-   "summer": 950,
-   "autumn": 950
+   "winter": 990,
+   "summer": 990,
+   "autumn": 990
   },
   "season_src": {
-   "winter": "среднее по 4 файл.",
-   "summer": "среднее по 4 файл.",
-   "autumn": "среднее по 4 файл."
+   "winter": "среднее по 4 файл. (в ценах 2026)",
+   "summer": "среднее по 4 файл. (в ценах 2026)",
+   "autumn": "среднее по 4 файл. (в ценах 2026)"
   }
  },
  "saffron": {
   "name": "Шафран (пачка 1 г)",
   "unit": "пачка",
   "section": "Специи",
-  "price": 1610,
-  "price_src": "среднее по 9 файл.",
+  "price": 1660,
+  "price_src": "среднее по 9 файл. (в ценах 2026)",
   "per100": 0.0,
   "default": false,
   "season": {
-   "winter": 1610,
-   "summer": 1610,
-   "autumn": 1610
+   "winter": 1660,
+   "summer": 1660,
+   "autumn": 1660
   },
   "season_src": {
-   "winter": "среднее по 9 файл.",
-   "summer": "среднее по 9 файл.",
-   "autumn": "среднее по 9 файл."
+   "winter": "среднее по 9 файл. (в ценах 2026)",
+   "summer": "среднее по 9 файл. (в ценах 2026)",
+   "autumn": "среднее по 9 файл. (в ценах 2026)"
   }
  },
  "star_anise": {
   "name": "Бадьян",
   "unit": "кг",
   "section": "Специи",
-  "price": 4000,
-  "price_src": "из 1 файла",
+  "price": 4400,
+  "price_src": "из 1 файла (в ценах 2026)",
   "per100": 0.0,
   "default": false,
   "season": {
-   "winter": 4000,
-   "summer": 4000,
-   "autumn": 4000
+   "winter": 4400,
+   "summer": 4400,
+   "autumn": 4400
   },
   "season_src": {
-   "winter": "из 1 файла",
-   "summer": "из 1 файла",
-   "autumn": "из 1 файла"
+   "winter": "из 1 файла (в ценах 2026)",
+   "summer": "из 1 файла (в ценах 2026)",
+   "autumn": "из 1 файла (в ценах 2026)"
   }
  },
  "mustard_black": {

@@ -505,10 +505,10 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="data/config.js"></script>
-<script src="data/catalog.js"></script>
-<script src="data/dishes.js"></script>
-<script src="data/img/index.js"></script>
+<script src="data/config.js?v=20261119"></script>
+<script src="data/catalog.js?v=20261119"></script>
+<script src="data/dishes.js?v=20261119"></script>
+<script src="data/img/index.js?v=20261119"></script>
 <script>
 (function () {
   const CFG = window.CONFIG || {};
@@ -521,7 +521,12 @@
   let REMOTE = { dishes: [], products: {} };
   try { REMOTE = JSON.parse(localStorage.getItem(REMOTE_KEY)) || REMOTE; } catch (e) {}
   let CAT = {}, DISHES = [], byId = {};
+  // сброс: правки на сайте, сделанные раньше SITE_EDITS_RESET, не применяем
+  const RESET_AT = CFG.SITE_EDITS_RESET || "";
+  const fresher = (x) => !RESET_AT || (x && x.updated || "") > RESET_AT;
   function rebuild() {
+    REMOTE.dishes = (REMOTE.dishes || []).filter(fresher);
+    REMOTE.products = Object.fromEntries(Object.entries(REMOTE.products || {}).filter(([, p]) => fresher(p)));
     CAT = Object.assign({}, BASE_CAT);
     for (const [k, p] of Object.entries(REMOTE.products || {})) {
       if (p.deleted) delete CAT[k]; else CAT[k] = Object.assign({}, BASE_CAT[k] || {}, p, { siteEdited: true });
@@ -582,6 +587,9 @@
     if (h.get("t")) S.date = h.get("t");
   }
   S.dishes = S.dishes.filter(id => byId[id]);
+  if (RESET_AT && (S.resetAt || "") < RESET_AT) {  // сброс правок количества, цен и состава блюд в этом браузере
+    Object.assign(S, { dishEdits: {}, edits: {}, extra: [], extraKeys: [], poster: Object.assign(S.poster || {}, { desc: {} }), resetAt: RESET_AT });
+  }
   S.dishEdits ||= {}; S.date ||= nextSunday(); S.poster = Object.assign(fresh().poster, S.poster || {}); S.poster.desc ||= {};
   if (![1, 2, 3, 4].includes(S.step)) S.step = 1;
   const season = () => S.seasonManual || seasonOfDate(S.date);

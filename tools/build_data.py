@@ -32,7 +32,7 @@ from price_sources import OCT, SEP  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 IDS_FILE = Path(__file__).parent / "dish_ids.json"
 BUTTER_PRICE = 3500
-MANUAL_PRICES = {"pistachio": 9500}  # в закупах 2025–2026 не было — средняя цена очищенных фисташек, Алматы  # гхи делаем сами из сливочного масла; средняя цена
+MANUAL_PRICES = {"pistachio": 9500, "karela": 3000, "sabudana": 2500}  # в закупах 2025–2026 не было — средние цены Алматы (индийские магазины)
 
 # Разделы = вкладки в Google Таблице
 DAIRY, GROCERY, VEG, OTHER, SPICE, HOUSE = "Молочка", "Бакалея", "Овощи и фрукты", "Остальное", "Специи", "Хоз. часть"
@@ -82,6 +82,8 @@ PRODUCTS = {
     "basil": ("Базилик", "кг", VEG, ["базилик свежий кг"]),
     "mint": ("Мята свежая", "кг", VEG, []),
     "ginger": ("Имбирь свежий", "кг", VEG, ["имбирь свежий кг"]),
+    "pineapple": ("Ананас", "кг", VEG, []),
+    "karela": ("Карела (горькая тыква)", "кг", VEG, []),
     "chili": ("Перец чили зелёный", "кг", VEG, ["чили зеленый свежий"]),
     "lemon": ("Лимоны", "шт", VEG, ["лимоны шт"]),
     "apple": ("Яблоки", "кг", VEG, ["яблоки"]),
@@ -98,6 +100,7 @@ PRODUCTS = {
     "currant_red": ("Смородина красная замороженная", "кг", FROZEN, []),
     "raspberry": ("Малина замороженная", "кг", FROZEN, []),
     "cherry_frozen": ("Вишня замороженная", "кг", FROZEN, []),
+    "sea_buckthorn": ("Облепиха замороженная", "кг", FROZEN, []),
     "peas_frozen": ("Горошек зелёный замороженный", "кг", FROZEN, ["горошек зеленый мороженный кг"]),
     "beans_green": ("Фасоль стручковая замороженная", "кг", FROZEN, ["фасоль стручковая мороженная кг", "стручковая фасоль (мороженная)"]),
     # ── бакалея ──
@@ -105,6 +108,8 @@ PRODUCTS = {
     "rice_basmati": ("Рис басмати", "кг", GROCERY, ["рис басмати"]),
     "rice_alanga": ("Рис для плова (аланга, лазер)", "кг", GROCERY, ["рис аланга (для плова)"]),
     "buckwheat": ("Гречка", "кг", GROCERY, ["гречка"]),
+    "corn_grits": ("Крупа кукурузная", "кг", GROCERY, []),
+    "sabudana": ("Саго (сабудана)", "кг", GROCERY, []),
     "millet": ("Пшено", "кг", GROCERY, ["пшенка кг"]),
     "quinoa": ("Киноа", "кг", GROCERY, ["киноа"]),
     "corn_grits": ("Крупа кукурузная", "кг", GROCERY, ["крупа кукурузная"]),
@@ -282,7 +287,7 @@ EVENTS = {
 }
 
 # Блюда, которые уже добавили на сайте вручную: их версия главная, из файлов не дублируем
-SITE_DISHES = {"Шак панир", "Чола", "Облепиховый напиток"}
+SITE_DISHES = set()
 
 DAIRY_KEYS = {k for k, v in PRODUCTS.items() if v[2] == DAIRY} | {"honey"}
 
@@ -390,7 +395,8 @@ ING_RULES = [  # опечатки и другие написания (архив
     (r"фасоль зел|мороженн\w* фасол|шасоль", "beans_green"), (r"тур дал|чана дал", "peas_split"), (r"мунг дал", "mung"),
     (r"вермиш|вермеш", ("pasta", lambda raw, unit, price: 0.4 if "400" in raw or "пач" in raw else 1)),
     (r"^кукуруза", "corn_can"), (r"киндза", "cilantro"), (r"^шинат", "spinach"), (r"^панит", "paneer"),
-    (r"фисташ", "pistachio"),
+    (r"фисташ", "pistachio"), (r"крупа кукуруз|кукурузн\w* круп", "corn_grits"), (r"сабудан|саго", "sabudana"),
+    (r"ананас|pineapple", "pineapple"), (r"карел", "karela"), (r"fresh ginger", "ginger"),
 ] + ING_RULES
 ING_RULES += [  # меню на английском (Cooking 19.07.2026)
     (r"^ghee$", "butter"), (r"basmati", "rice_basmati"), (r"patato|potato", "potato"), (r"cauliflower", "cauliflower"),
@@ -930,6 +936,23 @@ def seasonal_prices(catalog, may, more_prices):
 
 FATS = {"butter", "oil", "oil_corn", "oil_unref"}
 
+# Рост цен на продукты к 2026 году (Казахстан, продовольственная инфляция) — для цен из старых закупов
+INFLATION_TO_2026 = {2023: 1.30, 2024: 1.20, 2025: 1.10, 2026: 1.00}
+
+
+def file_year(fname):
+    """Год закупа по имени файла: «20241013_ВП», «16.04.23 200 чел», «закуп 06 04 25», «…-2025»."""
+    m = (re.match(r"(20\d{2})\d{4}", fname) or re.search(r"(?<!\d)\d{1,2}[ .]\d{2}[ .](\d{2})(?!\d)", fname)
+         or re.search(r"(20\d{2})", fname))
+    if not m:
+        return 2025
+    y = int(m.group(1))
+    return 2000 + y if y < 100 else y
+
+
+def to_2026(fname):
+    return INFLATION_TO_2026.get(file_year(fname), 1.30 if file_year(fname) < 2023 else 1.0)
+
 
 def combine(group):
     """Раскладка блюда по нескольким приготовлениям.
@@ -1109,7 +1132,7 @@ def build():
             key, f = hit
             if key == "karkade" and f != 1:
                 continue  # пачки каркаде — цену за кг не посчитать
-            by_file[key][fname].append(p / f)
+            by_file[key][fname].append(p / f * to_2026(fname))
     for src, table in (("Закуп 17.10.2026", OCT), ("Радхаштами 2026", SEP)):
         for k, (p, _) in table.items():
             key = PRICE_ALIASES.get(k)
@@ -1121,6 +1144,9 @@ def build():
             by_file[hit[0]][fname].append(p / hit[1])
 
     def avg_price(key):
+        return _avg_price(key)
+
+    def _avg_price(key):
         vals = [statistics.mean(v) for v in by_file.get(key, {}).values()]
         if not vals:
             return None, 0
@@ -1138,7 +1164,7 @@ def build():
         if may.get(key):
             return round(statistics.mean(may[key])), "май 2026"
         if avg:
-            return int(round(avg, -1)), f"среднее по {n} файл." if n > 1 else "из 1 файла"
+            return int(round(avg, -1)), (f"среднее по {n} файл." if n > 1 else "из 1 файла") + " (в ценах 2026)"
         if key in MANUAL_PRICES:
             return MANUAL_PRICES[key], "оценка 2026"
         return None, ""

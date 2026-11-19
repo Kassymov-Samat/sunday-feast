@@ -4,5 +4,8 @@
 window.CONFIG = {
   // Скрипт в аккаунте fairfreeman@gmail.com: https://script.google.com/d/1TV4qXCu2fyehqTheDC29L_6zxW5OG6VmTAkvWNJRiIeidVJbp8A2SVao/edit
   DOCS_WEBAPP_URL: "https://script.google.com/macros/s/AKfycbw1qWH85jwimc0RbvYWHvSIw6Qfkyxs9D0qFDZk7QlIrT25GWLGgOnGahZbK00-oNqZxA/exec",
-  DEFAULT_GUESTS: 50
+  DEFAULT_GUESTS: 50,
+  // Правки блюд и продуктов, сделанные на сайте до этого момента, не учитываются — всё как в исходных файлах.
+  // Копия сброшенных правок: C:\projects\блюда\backup\правки-сайта-до-сброса-2026-11-19.json
+  SITE_EDITS_RESET: "2026-11-19T07:30:00Z"
 };
