@@ -58,7 +58,8 @@ def prompt_for(d, cat):
             "Сладости": "Сладости выложены на латунном блюде, несколько штук. ",
             "Хлеб и выпечка": "Выпечка на деревянной доске или латунном блюде. ",
             "Салаты и нарезки": "Салат в широкой латунной миске. "}.get(d["category"], "")
-    return (f"Сгенерируй изображение. Блюдо: «{d['name']}» ({d['category'].lower()}). "
+    return (f"Сгенерируй одно изображение — одно блюдо крупным планом, не коллаж и не сетка из нескольких фото; "
+            f"не опирайся на прошлые изображения. Блюдо: «{d['name']}» ({d['category'].lower()}). "
             f"Состав (видно на фото только это, ничего лишнего): {comp}. {kind}{STYLE}")
 
 
@@ -159,7 +160,7 @@ def wait_login(tab):
 
 
 IMGS = """[...document.querySelectorAll('main img')].filter(e => e.naturalWidth >= 512 && e.complete &&
-  (/енерир|enerated/i.test(e.alt) || /oaiusercontent|backend-api|estuary|^blob:/.test(e.src))).map(e => e.src)"""
+  /енерир|enerated/i.test(e.alt)).map(e => e.src)"""
 FETCH = """(async (u) => { const r = await fetch(u, {credentials: 'include'}); const b = await r.blob();
   return await new Promise(res => { const f = new FileReader(); f.onload = () => res(f.result.split(',')[1]); f.readAsDataURL(b); }); })"""
 
@@ -174,8 +175,22 @@ def generate(tab, text, timeout_s=480):
     before = set(tab.js(IMGS) or [])
     tab.js(f"{EDITOR}.focus()")
     tab.call("Input.insertText", {"text": text})
-    time.sleep(1)
-    tab.key_enter()
+    time.sleep(1.5)
+    # отправка: кнопка «Отправить», если её нет — Enter; проверяем, что чат начался (адрес /c/…)
+    SEND = "document.querySelector('[data-testid=send-button], #composer-submit-button, button[aria-label*=\"Отправить\"], button[aria-label*=\"Send\"]')"
+    for _ in range(4):
+        if not tab.js(f"!!{SEND} && !{SEND}.disabled && ({SEND}.click(), true)"):
+            tab.js(f"{EDITOR}.focus()")
+            tab.key_enter()
+        for _ in range(10):
+            time.sleep(1)
+            if "/c/" in (tab.js("location.pathname") or ""):
+                break
+        else:
+            continue
+        break
+    else:
+        return None, "не отправилось"
     t0, last = time.time(), None
     while time.time() - t0 < timeout_s:
         time.sleep(5)
@@ -219,7 +234,8 @@ def main():
     for d in todo:
         for attempt in range(3):
             try:
-                data, st = generate(tab, prompt_for(d, cat))
+                tab = fresh_tab()  # в новой вкладке картинка ловится сразу; в старой — через раз
+                data, st = generate(tab, prompt_for(d, cat), timeout_s=240)
             except Exception as e:
                 data, st = None, f"ошибка: {str(e)[:150]}"
                 tab = fresh_tab()
