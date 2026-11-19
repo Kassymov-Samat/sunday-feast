@@ -167,12 +167,23 @@ FETCH = """(async (u) => { const r = await fetch(u, {credentials: 'include'}); c
 
 def generate(tab, text, timeout_s=480):
     import base64
-    tab.goto("https://chatgpt.com/")
-    for _ in range(30):
-        if tab.js(f"!!{EDITOR}"):
+    # нужен новый пустой чат: иногда ChatGPT открывает последний разговор — тогда запрос ушёл бы туда,
+    # а старая картинка из него была бы принята за новую
+    for attempt in range(4):
+        tab.goto("https://chatgpt.com/" if attempt == 0 else "https://chatgpt.com/?new=" + str(time.time()))
+        for _ in range(30):
+            if tab.js(f"!!{EDITOR}"):
+                break
+            time.sleep(1)
+        empty = tab.js("location.pathname === '/' && !document.querySelector('main img[alt]') && "
+                       "!/Вы сказали|You said/.test(document.querySelector('main')?.innerText || '')")
+        if empty:
             break
-        time.sleep(1)
-    before = set(tab.js(IMGS) or [])
+        tab.js("document.querySelector('[data-testid=create-new-chat-button], a[href=\"/\"]')?.click()")
+        time.sleep(3)
+    else:
+        return None, "не открылся новый чат"
+    before = set(tab.js("[...document.querySelectorAll('img')].map(e => e.src)") or [])
     tab.js(f"{EDITOR}.focus()")
     tab.call("Input.insertText", {"text": text})
     time.sleep(1.5)
