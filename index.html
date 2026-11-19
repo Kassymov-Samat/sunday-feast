@@ -526,6 +526,8 @@
     for (const [k, p] of Object.entries(REMOTE.products || {})) {
       if (p.deleted) delete CAT[k]; else CAT[k] = Object.assign({}, BASE_CAT[k] || {}, p, { siteEdited: true });
     }
+    for (const [k, c] of Object.entries(CAT))
+      if (c.section === "Овощи и фрукты" && /заморож|морожен/i.test(c.name)) CAT[k] = { ...c, section: "Заморозка" };
     const m = new Map(BASE_DISHES.map(d => [d.id, d]));
     for (const d of REMOTE.dishes || []) {
       if (d.deleted) m.delete(d.id); else m.set(d.id, Object.assign({}, m.get(d.id) || {}, d));
@@ -541,6 +543,7 @@
     { name: "Молочка", tab: "Молочка", icon: "🥛" },
     { name: "Бакалея", tab: "Бакалея", icon: "🌾" },
     { name: "Овощи и фрукты", tab: "Овощи и фрукты", icon: "🥕" },
+    { name: "Заморозка", tab: "Заморозка", icon: "🧊" },
     { name: "Специи", tab: "Бакалея", icon: "🧂" },
     { name: "Остальное", tab: "Остальное", icon: "📦" },
     { name: "Хоз. часть", tab: "Остальное", icon: "🧽" },
@@ -1259,7 +1262,7 @@
   function showDoc(html) { $("docMsg").innerHTML = html; $("docDialog").showModal(); }
 
   // ── Excel: листы Сводка · Молочка · Бакалея (+специи) · Овощи и фрукты · Остальное (+хоз. часть) ──
-  const EXCEL_TABS = ["Молочка", "Бакалея", "Овощи и фрукты", "Остальное"];
+  const EXCEL_TABS = ["Молочка", "Бакалея", "Овощи и фрукты", "Заморозка", "Остальное"];
   function loadExcelJS() {
     if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
     return new Promise((res, rej) => {
@@ -1409,7 +1412,7 @@
       const x = await buildExcel();
       const res = await api({ action: "xlsxToSheet", name: x.name.replace(/\.xlsx$/, ""), base64: await toBase64(x.blob) });
       if (win) win.location.href = res.url; else window.open(res.url, "_blank");
-      showDoc(`<p>Google Таблица создана — листы: Сводка, Раскладка, Молочка, Бакалея, Овощи и фрукты, Остальное.
+      showDoc(`<p>Google Таблица создана — листы: Сводка, Раскладка, Молочка, Бакалея, Овощи и фрукты, Заморозка, Остальное.
         Доступ по ссылке — редактировать могут все.</p>
         <a class="doclink" href="${esc(res.url)}" target="_blank" rel="noopener">${esc(res.url)}</a>`);
     } catch (err) {

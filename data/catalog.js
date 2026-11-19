@@ -872,7 +872,7 @@ window.CATALOG = {
  "strawberry": {
   "name": "Клубника (свежая или замороженная)",
   "unit": "кг",
-  "section": "Овощи и фрукты",
+  "section": "Заморозка",
   "price": 3000,
   "price_src": "май 2026",
   "season": {
@@ -889,13 +889,13 @@ window.CATALOG = {
  "currant": {
   "name": "Смородина чёрная замороженная",
   "unit": "кг",
-  "section": "Овощи и фрукты",
+  "section": "Заморозка",
   "price": 2500,
   "price_src": "май 2026",
   "season": {
    "winter": 2500,
    "summer": 3580,
-   "autumn": 3220
+   "autumn": 3040
   },
   "season_src": {
    "winter": "закупы 2026, зима–весна (4 файл.)",
@@ -906,58 +906,58 @@ window.CATALOG = {
  "currant_red": {
   "name": "Смородина красная замороженная",
   "unit": "кг",
-  "section": "Овощи и фрукты",
+  "section": "Заморозка",
   "price": 1200,
   "price_src": "из 1 файла",
   "season": {
-   "winter": 1660,
-   "summer": 830,
-   "autumn": 1110
+   "winter": 1200,
+   "summer": 1200,
+   "autumn": 1200
   },
   "season_src": {
-   "winter": "расчёт по сезону",
-   "summer": "расчёт по сезону",
+   "winter": "из 1 файла",
+   "summer": "из 1 файла",
    "autumn": "из 1 файла"
   }
  },
  "raspberry": {
   "name": "Малина замороженная",
   "unit": "кг",
-  "section": "Овощи и фрукты",
+  "section": "Заморозка",
   "price": 1800,
   "price_src": "из 1 файла",
   "season": {
-   "winter": 2480,
-   "summer": 1240,
+   "winter": 1650,
+   "summer": 1650,
    "autumn": 1650
   },
   "season_src": {
    "autumn": "закупы 2026, осень (1 файл.)",
-   "winter": "расчёт по сезону",
-   "summer": "расчёт по сезону"
+   "winter": "из 1 файла",
+   "summer": "из 1 файла"
   }
  },
  "cherry_frozen": {
   "name": "Вишня замороженная",
   "unit": "кг",
-  "section": "Овощи и фрукты",
+  "section": "Заморозка",
   "price": 2150,
   "price_src": "из 1 файла",
   "season": {
-   "winter": 2560,
-   "summer": 1890,
-   "autumn": 2000
+   "winter": 2150,
+   "summer": 2150,
+   "autumn": 2150
   },
   "season_src": {
-   "winter": "расчёт по сезону",
-   "summer": "расчёт по сезону",
-   "autumn": "расчёт по сезону"
+   "winter": "из 1 файла",
+   "summer": "из 1 файла",
+   "autumn": "из 1 файла"
   }
  },
  "peas_frozen": {
   "name": "Горошек зелёный замороженный",
   "unit": "кг",
-  "section": "Овощи и фрукты",
+  "section": "Заморозка",
   "price": 1900,
   "price_src": "май 2026",
   "season": {
@@ -974,7 +974,7 @@ window.CATALOG = {
  "beans_green": {
   "name": "Фасоль стручковая замороженная",
   "unit": "кг",
-  "section": "Овощи и фрукты",
+  "section": "Заморозка",
   "price": 2000,
   "price_src": "май 2026",
   "season": {

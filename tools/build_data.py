@@ -36,6 +36,7 @@ MANUAL_PRICES = {"pistachio": 9500}  # в закупах 2025–2026 не был
 
 # Разделы = вкладки в Google Таблице
 DAIRY, GROCERY, VEG, OTHER, SPICE, HOUSE = "Молочка", "Бакалея", "Овощи и фрукты", "Остальное", "Специи", "Хоз. часть"
+FROZEN = "Заморозка"  # замороженный горошек, фасоль и ягоды — отдельной вкладкой в таблице
 
 # ключ: (название, единица, раздел, [варианты написания в файле ретрита])
 PRODUCTS = {
@@ -92,13 +93,13 @@ PRODUCTS = {
     "plum": ("Слива", "кг", VEG, []),
     "apricot": ("Абрикосы", "кг", VEG, []),
     "nectarine": ("Нектарины / персики", "кг", VEG, []),
-    "strawberry": ("Клубника (свежая или замороженная)", "кг", VEG, ["клубника свежая"]),
-    "currant": ("Смородина чёрная замороженная", "кг", VEG, ["смородина черная замороженная"]),
-    "currant_red": ("Смородина красная замороженная", "кг", VEG, []),
-    "raspberry": ("Малина замороженная", "кг", VEG, []),
-    "cherry_frozen": ("Вишня замороженная", "кг", VEG, []),
-    "peas_frozen": ("Горошек зелёный замороженный", "кг", VEG, ["горошек зеленый мороженный кг"]),
-    "beans_green": ("Фасоль стручковая замороженная", "кг", VEG, ["фасоль стручковая мороженная кг", "стручковая фасоль (мороженная)"]),
+    "strawberry": ("Клубника (свежая или замороженная)", "кг", FROZEN, ["клубника свежая"]),
+    "currant": ("Смородина чёрная замороженная", "кг", FROZEN, ["смородина черная замороженная"]),
+    "currant_red": ("Смородина красная замороженная", "кг", FROZEN, []),
+    "raspberry": ("Малина замороженная", "кг", FROZEN, []),
+    "cherry_frozen": ("Вишня замороженная", "кг", FROZEN, []),
+    "peas_frozen": ("Горошек зелёный замороженный", "кг", FROZEN, ["горошек зеленый мороженный кг"]),
+    "beans_green": ("Фасоль стручковая замороженная", "кг", FROZEN, ["фасоль стручковая мороженная кг", "стручковая фасоль (мороженная)"]),
     # ── бакалея ──
     "rice_barakat": ("Рис круглый (баракат, краснодарский)", "кг", GROCERY, ["рис баракат"]),
     "rice_basmati": ("Рис басмати", "кг", GROCERY, ["рис басмати"]),
@@ -859,9 +860,9 @@ SEASON_COEF = {
 }
 _GROUPS = {
     "greens": {"cilantro", "dill", "parsley", "mint", "basil", "spinach", "lettuce", "iceberg"},
-    "tender": {"tomato", "cherry", "cucumber", "pepper_bell", "eggplant", "zucchini", "chili", "beans_green", "radish"},
+    "tender": {"tomato", "cherry", "cucumber", "pepper_bell", "eggplant", "zucchini", "chili", "radish"},
     "roots": {"potato", "carrot", "carrot_yellow", "beet", "cabbage", "pumpkin", "peking", "cauliflower", "broccoli"},
-    "berries": {"strawberry", "raspberry", "apricot", "nectarine", "plum", "grape", "currant", "currant_red"},
+    "berries": {"strawberry", "apricot", "nectarine", "plum", "grape"},
     "orchard": {"apple", "pear"},
     "citrus": {"lemon", "orange", "mandarin"},
 }
