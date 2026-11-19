@@ -530,6 +530,8 @@
     for (const d of REMOTE.dishes || []) {
       if (d.deleted) m.delete(d.id); else m.set(d.id, Object.assign({}, m.get(d.id) || {}, d));
     }
+    // рис, плов, пулау, кичри — свой раздел, даже если блюдо правили на сайте, когда оно было в «Сабджи»
+    for (const [id, d] of m) if (d.category === "Сабджи и вторые блюда" && /^(рис|пулау|плов|кичри)/i.test(d.name)) m.set(id, { ...d, category: "Рис и плов" });
     DISHES = [...m.values()].sort((a, b) => a.name.localeCompare(b.name, "ru"));
     byId = Object.fromEntries(DISHES.map(d => [d.id, d]));
   }
@@ -546,6 +548,7 @@
   // Цветные блоки меню: раздел справочника → блок
   const TILES = [
     { id: "sabji", name: "Сабджи", em: "🍛", c: "#d9782d", cats: ["Сабджи и вторые блюда"] },
+    { id: "rice", name: "Рис и плов", em: "🍚", c: "#5b5fa8", cats: ["Рис и плов"] },
     { id: "soup", name: "Супы и далы", em: "🍲", c: "#c49a1c", cats: ["Супы и далы"] },
     { id: "snack", name: "Закуски", em: "🥟", c: "#c8492f", cats: ["Закуски"] },
     { id: "sweet", name: "Сладкое", em: "🍮", c: "#c9507a", cats: ["Сладости"] },

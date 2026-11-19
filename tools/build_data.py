@@ -474,6 +474,7 @@ def salad_name(k):
     return ""
 
 
+RICE = "Рис и плов"
 SAL, SAB, SOUP, BREAD, SNACK, SWEET, DRINK, SAUCE, FRUIT, KASHA = (
     "Салаты и нарезки", "Сабджи и вторые блюда", "Супы и далы", "Хлеб и выпечка", "Закуски", "Сладости",
     "Напитки", "Соусы и подливки", "Фрукты", "Каши")
@@ -1056,7 +1057,8 @@ def build():
                          "Плов": "Плов овощной"}.items():
             ids[now] = ids.pop(was)
     nxt = max(int(v[1:]) for v in ids.values()) + 1
-    old_names = set(ids)
+    # «старые» блюда — исходные 130 справочника (id до d130); новые из архива и меню 2025–2026 — после
+    old_names = {n for n, i in ids.items() if int(i[1:]) <= 130}
     for name in sorted(groups):
         if name not in ids:
             ids[name], nxt = f"d{nxt}", nxt + 1
@@ -1091,6 +1093,10 @@ def build():
             d["products"] = {k: round(v * f, 5) for k, v in d["products"].items()}
             d["spices"] = {k: round(v * f, 6) for k, v in d["spices"].items()}
             d["source"] += f"; порция приведена к типичной для раздела (×{f:.2f})"
+    # блюда из риса — отдельный раздел, не в сабджи
+    for d in dish_list:
+        if d["category"] == SAB and re.match(r"^(рис|пулау|плов|кичри)", d["name"].lower()):
+            d["category"] = RICE
     dish_list.sort(key=lambda d: (d["category"], d["name"]))
     IDS_FILE.write_text(json.dumps(ids, ensure_ascii=False, indent=1), encoding="utf-8")
 

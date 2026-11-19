@@ -125,6 +125,25 @@ class Tab:
                                                  **({"text": "\r"} if t == "keyDown" else {})})
 
 
+def fresh_tab():
+    """Вкладка зависла (бывает после многих часов) — закрываем её и открываем новую."""
+    import urllib.request
+    f = PROFILE / "sf_tab.txt"
+    try:
+        tid = f.read_text().strip()
+        urllib.request.urlopen(f"http://127.0.0.1:{Tab.PORT}/json/close/{tid}", timeout=10)
+    except Exception:
+        pass
+    f.unlink(missing_ok=True)
+    time.sleep(3)
+    try:
+        return Tab()
+    except Exception as e:
+        log(f"не открылась новая вкладка: {str(e)[:120]}")
+        time.sleep(30)
+        return Tab()
+
+
 EDITOR = "document.querySelector('#prompt-textarea, .ProseMirror[contenteditable=true]')"
 
 
@@ -203,10 +222,7 @@ def main():
                 data, st = generate(tab, prompt_for(d, cat))
             except Exception as e:
                 data, st = None, f"ошибка: {str(e)[:150]}"
-                try:
-                    tab = Tab()
-                except Exception:
-                    pass
+                tab = fresh_tab()
             if data:
                 save(data, d["id"])
                 done += 1
@@ -218,6 +234,8 @@ def main():
                 time.sleep(30 * 60)
             else:
                 time.sleep(15)
+                if st == "timeout":
+                    tab = fresh_tab()  # вкладка могла зависнуть — открываем новую
         time.sleep(6)
     log(f"готово: {done}")
 
